@@ -14,13 +14,12 @@
       (:: (car nums) (add1 (caddr nums)))
       (:: (cadr nums) (add1 (cadddr nums))))))
 
-(define-type NNInt Nonnegative-Integer)
-(define-type Slice-Transformer (-> (Array NNInt) (Array NNInt)))
+(define-type Slice-Transformer (-> (Array Integer) (Array Integer)))
 
-(: process-instructions (-> Slice-Transformer Slice-Transformer Slice-Transformer NNInt))
+(: process-instructions (-> Slice-Transformer Slice-Transformer Slice-Transformer Integer))
 (define (process-instructions turn-on turn-off toggle)
-  (let ([ary : (Settable-Array NNInt) 
-         (array->mutable-array (make-array #(1000 1000) 0))])
+  (let ([ary : (Settable-Array Integer) 
+        (array->mutable-array (make-array #(1000 1000) 0))])
     (for ([l (in-lines)])
       (let* ([prefix (regexp-match #rx"[a-z ]+" l)]
              [slice-spec (line-to-slice l)]
@@ -32,10 +31,14 @@
                             [else (toggle slice)]))))
     (array-all-sum ary)))
 
-; part 1
-(let ([one : (Array NNInt) (array 1)]
-      [zero : (Array NNInt) (array 0)])
-  (process-instructions (λ (_) one) 
-                        (λ (_) zero) 
-                        (λ (s) (array-map (λ ([v : NNInt]) (if (= 0 v) 1 0)) 
-                                          s))))
+(define (part1)
+  (let ([one : (Array Integer) (array 1)]
+        [zero : (Array Integer) (array 0)])
+    (process-instructions (λ (_) one) 
+                          (λ (_) zero) 
+                          (λ (s) (array-map (λ ([v : Integer]) (if (= 0 v) 1 0)) s)))))
+
+(define (part2)
+  (process-instructions (λ (s) (array+ s (array 1))) 
+                        (λ (s) (array-if (array= s (array 0)) s (array- s (array 1)))) 
+                        (λ (s) (array+ s (array 2)))))
