@@ -2,9 +2,6 @@
 
 (require math/array)
 
-(require/typed rnrs/io/ports-6 
-               [open-file-input-port (-> String Input-Port)])
-
 (: parse-command (-> String (Listof Integer)))
 (define (parse-command l)
   (map (cast string->number (-> String Integer))
@@ -17,14 +14,16 @@
       (:: (car nums) (add1 (caddr nums)))
       (:: (cadr nums) (add1 (cadddr nums))))))
 
-(let ([ary : (Settable-Array Boolean) (array->mutable-array (make-array #(1000 1000) #f))]
-      [trues : (Array Boolean) (array #t)]
-      [falses : (Array Boolean) (array #f)])
-  (for ([l (in-lines (open-file-input-port "006.txt"))])
+(let ([ary : (Settable-Array Nonnegative-Integer) (array->mutable-array (make-array #(1000 1000) 0))]
+      [one : (Array Nonnegative-Integer) (array 1)]
+      [zero : (Array Nonnegative-Integer) (array 0)])
+  (for ([l (in-lines)])
     (let ([prefix (regexp-match #rx"[a-z ]+" l)]
           [slice (line-to-slice l)])
       (case (car (cast prefix (Listof String)))
-        [("turn on ") (array-slice-set! ary slice trues)]
-        [("turn off ") (array-slice-set! ary slice falses)]
-        [else (array-slice-set! ary slice (array-map not (array-slice-ref ary slice)))])))
-  (array-count (inst identity Boolean) ary))
+        [("turn on ") (array-slice-set! ary slice one)]
+        [("turn off ") (array-slice-set! ary slice zero)]
+        [else (array-slice-set! ary slice 
+                (array-map (λ ([v : Nonnegative-Integer]) (if (= 0 v) 1 0))
+                           (array-slice-ref ary slice)))])))
+  (array-all-sum ary))
