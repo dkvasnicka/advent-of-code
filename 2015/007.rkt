@@ -43,4 +43,5 @@
         (hash-set! adjlist n new-nv)
         new-nv))))
 
+(hash-set! adjlist "b" 956) ; Part 2 - overriding the b wire
 (node-val "a")
