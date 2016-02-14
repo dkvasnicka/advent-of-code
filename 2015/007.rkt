@@ -1,8 +1,7 @@
 #lang racket
 
 (require (only-in lang/htdp-advanced string-numeric?)
-         racket/unsafe/ops
-         racket/fixnum)
+         racket/unsafe/ops)
 
 (struct node (op opnds) #:transparent)
 
@@ -22,16 +21,26 @@
 (define (build-adjacency-list)
   (for/hash ([line (in-lines)])
     (let ([vk (string-split line #px"->")])
-      (values
-        (string-trim (cadr vk))
-        (parse-node-exp (car vk))))))
+     (values
+       (string-trim (cadr vk))
+       (parse-node-exp (car vk))))))
 
-(define (node-val adjlist n)
+(define adjlist 
+  (make-hash
+    (hash->list
+      (build-adjacency-list))))
+
+(define (compute-node-val nval)
+  (apply (node-op nval) 
+         (map node-val 
+              (node-opnds nval))))
+
+(define (node-val n)
   (let ([nval (hash-ref adjlist n)])
     (if (number? nval)
       nval
-      (apply (node-op nval) 
-             (map (curry node-val adjlist) 
-                  (node-opnds nval))))))
+      (let ([new-nv (compute-node-val nval)])
+        (hash-set! adjlist n new-nv)
+        new-nv))))
 
-(node-val (build-adjacency-list) "a")
+(node-val "a")
