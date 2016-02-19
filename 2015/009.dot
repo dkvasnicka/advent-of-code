@@ -1,0 +1,71 @@
+digraph G {
+	AlphaCentauri;
+	Faerun;
+	Tambi;
+	Norrath;
+	Straylight;
+	Arbre;
+	Snowdin;
+	Tristram;
+	subgraph U {
+		edge [dir=none];
+	}
+	subgraph D {
+		AlphaCentauri -> Tambi [label=18];
+		AlphaCentauri -> Norrath [label=+inf.0];
+		AlphaCentauri -> Arbre [label=116];
+		AlphaCentauri -> Straylight [label=91];
+		AlphaCentauri -> Tristram [label=+inf.0];
+		AlphaCentauri -> Faerun [label=+inf.0];
+		AlphaCentauri -> Snowdin [label=12];
+		Faerun -> AlphaCentauri [label=13];
+		Faerun -> Tambi [label=71];
+		Faerun -> Norrath [label=129];
+		Faerun -> Arbre [label=24];
+		Faerun -> Straylight [label=67];
+		Faerun -> Tristram [label=58];
+		Faerun -> Snowdin [label=60];
+		Tambi -> AlphaCentauri [label=+inf.0];
+		Tambi -> Norrath [label=+inf.0];
+		Tambi -> Arbre [label=+inf.0];
+		Tambi -> Straylight [label=70];
+		Tambi -> Tristram [label=+inf.0];
+		Tambi -> Faerun [label=+inf.0];
+		Tambi -> Snowdin [label=+inf.0];
+		Norrath -> AlphaCentauri [label=15];
+		Norrath -> Tambi [label=82];
+		Norrath -> Arbre [label=135];
+		Norrath -> Straylight [label=54];
+		Norrath -> Tristram [label=142];
+		Norrath -> Faerun [label=+inf.0];
+		Norrath -> Snowdin [label=75];
+		Straylight -> AlphaCentauri [label=+inf.0];
+		Straylight -> Tambi [label=+inf.0];
+		Straylight -> Norrath [label=+inf.0];
+		Straylight -> Arbre [label=+inf.0];
+		Straylight -> Tristram [label=+inf.0];
+		Straylight -> Faerun [label=+inf.0];
+		Straylight -> Snowdin [label=+inf.0];
+		Arbre -> AlphaCentauri [label=+inf.0];
+		Arbre -> Tambi [label=53];
+		Arbre -> Norrath [label=+inf.0];
+		Arbre -> Straylight [label=40];
+		Arbre -> Tristram [label=+inf.0];
+		Arbre -> Faerun [label=+inf.0];
+		Arbre -> Snowdin [label=129];
+		Snowdin -> AlphaCentauri [label=+inf.0];
+		Snowdin -> Tambi [label=15];
+		Snowdin -> Norrath [label=+inf.0];
+		Snowdin -> Arbre [label=+inf.0];
+		Snowdin -> Straylight [label=99];
+		Snowdin -> Tristram [label=+inf.0];
+		Snowdin -> Faerun [label=+inf.0];
+		Tristram -> AlphaCentauri [label=118];
+		Tristram -> Tambi [label=49];
+		Tristram -> Norrath [label=+inf.0];
+		Tristram -> Arbre [label=122];
+		Tristram -> Straylight [label=97];
+		Tristram -> Faerun [label=+inf.0];
+		Tristram -> Snowdin [label=103];
+	}
+}
