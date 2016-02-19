@@ -9,9 +9,7 @@
 (define (read-edges)
   (let ([g (weighted-graph/undirected '())])
     (for ([l (lines-seq)])
-      (let ([weight (string->number (third l))])
-        (add-edge! g (first l) (second l) weight)
-        (add-edge! g (second l) (first l) weight))) 
+      (add-edge! g (first l) (second l) (string->number (third l))))
     g))
 
 (define (shortest-from g vertices start)
