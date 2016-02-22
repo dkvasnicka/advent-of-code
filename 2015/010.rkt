@@ -1,7 +1,5 @@
 #lang racket
 
-(require data/collection)
-
 (define (counting-drop-while fn? strm (cnt 0))
   (if (or (empty? strm) (not (fn? (first strm))))
     (values cnt strm)
@@ -12,11 +10,11 @@
     '()
     (let*-values ([(head) (first strm)]
                   [(cnt tail) (counting-drop-while (curry = head) strm)])
-      (stream-cons cnt
-                   (stream-cons head
-                                (look-and-say tail))))))
+      (cons cnt
+            (cons head
+                  (look-and-say tail))))))
 
 (length
   (for/fold ([initval '(1 1 1 3 1 2 2 1 1 3)])
-            ([i 40])
+            ([i 50])
     (look-and-say initval)))
