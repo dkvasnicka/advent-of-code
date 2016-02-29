@@ -25,10 +25,12 @@
     (cond 
       [(and (> decs 1) (> (set-count pairs) 1)) #t]
       [(null? (cdr seq)) #f]
-      [else (loop
-              (if (= 1 (- (car seq) (cadr seq))) (add1 decs) (if (> decs 1) decs 0))
-              (if (= (car seq) (cadr seq)) (set-add pairs (car seq)) pairs)
-              (cdr seq))])))
+      [else (let ([x (car seq)]
+                  [y (cadr seq)])
+              (loop
+                (if (= 1 (- x y)) (add1 decs) (if (> decs 1) decs 0))
+                (if (= x y) (set-add pairs x) pairs)
+                (cdr seq)))])))
 
 (define (back-to-string newpwd)
   (sequence->string
