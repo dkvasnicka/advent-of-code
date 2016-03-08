@@ -1,7 +1,7 @@
 #lang racket
 
 (require graph
-         "009.rkt")
+         "hamiltonian.rkt")
 
 (define (parse-row s)
   (let ([data (string-split s)])
@@ -20,6 +20,5 @@
     (for/list ([e (in-hash-pairs edge-hash)])
       (cons (cdr e) (set->list (car e))))))
 
-(find-path
-  (build-graph 
-    (load-edges)))
+(hamiltonian (build-graph (load-edges)) 
+             #:type 'cycle)
