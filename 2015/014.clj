@@ -1,15 +1,20 @@
 
+(defrecord Reindeer [speed flight-time rest-time])
+
+(defn line->Reindeer [l]
+  (apply ->Reindeer (map #(Integer/parseInt %) l)))
+
 (defn compute-distance [data]
-  (let [cycle-len (+ (second data) (nth data 2))
+  (let [cycle-len (+ (:flight-time data) (:rest-time data))
         cycles (quot 2503 cycle-len)
-        cycle-dist (* (first data) (second data))]
+        cycle-dist (* (:speed data) (:flight-time data))]
     (+ (* cycle-dist cycles)
-       (min cycle-dist (* (first data) (* cycle-len (- (/ 2503 cycle-len) cycles)))))))
+       (min cycle-dist (* (:speed data) (rem 2503 cycle-len))))))
 
 (def xf 
   (comp
     (map (partial re-seq #"[0-9]+"))
-    (map (partial map #(Integer/parseInt %)))
+    (map line->Reindeer)
     (map compute-distance)))
 
 (println
