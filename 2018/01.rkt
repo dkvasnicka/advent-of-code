@@ -1,9 +1,9 @@
 #lang racket
 
 (require math/base
-         data/collection)
+         (only-in data/collection foldl/steps cycle))
 
-(define data (for/list ([n (in-lines)]) (string->number n)))
+(define data (sequence->list (in-port)))
 
 (displayln (sum data))
 
