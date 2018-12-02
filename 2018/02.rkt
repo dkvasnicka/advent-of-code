@@ -6,20 +6,15 @@
 
 ; Part 1
 (define (process-id desired-freqs freq-vals counts)
-  (if (null? desired-freqs)
-      counts
-      (process-id (cdr desired-freqs)
-                  freq-vals
-                  (if (member (car desired-freqs) freq-vals)
-                      (hash-update counts (car desired-freqs) add1 0)
-                      counts))))
+  (for/fold ([counts-hash counts]) ([f desired-freqs])
+    (if (member f freq-vals)
+        (hash-update counts-hash f add1 0)
+        counts-hash)))
 
 (define id-candidate-counts
   (for/fold ([counts (hasheq)])
             ([box-id data])
-    (let* ([freqs (frequencies box-id)]
-           [freq-vals (hash-values freqs)])
-      (process-id '(2 3) freq-vals counts))))
+    (process-id '(2 3) (hash-values (frequencies box-id)) counts)))
 
 (displayln
   (* (id-candidate-counts 2) (id-candidate-counts 3)))
