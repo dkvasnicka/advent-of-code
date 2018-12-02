@@ -1,9 +1,8 @@
 #lang rackjure
 
-(require list-utils
-         data/collection)
+(require list-utils)
 
-(define data (map string->list (sequence->stream (in-lines))))
+(define data (stream-map string->list (sequence->stream (in-lines))))
 
 ; Part 1
 (define (process-id desired-freqs freq-vals counts)
@@ -26,19 +25,18 @@
   (* (id-candidate-counts 2) (id-candidate-counts 3)))
 
 ; Part 2
-(define (similarity id-pair)
-  (for/sum ([ch1 (first id-pair)]
-            [ch2 (second id-pair)])
-    (if (char=? ch1 ch2) 1 0)))
+(define (similarity id1 id2)
+  (for/sum ([ch1 id1] [ch2 id2])
+    (if (char=? ch1 ch2) 0 1)))
 
-(define most-similar-pair
-  (find-max (filter (λ (s) (not (eq? (first s) (second s))))
-                    (cartesian-product data data))
-            #:key similarity))
+(match-define (list winner1 winner2)
+  (for*/last ([id1 data] [id2 data]
+              #:unless (eq? id1 id2)
+              #:final (= 1 (similarity id1 id2)))
+    (list id1 id2)))
 
 (displayln
   (list->string
-    (for/list ([ch1 (first most-similar-pair)]
-               [ch2 (second most-similar-pair)]
+    (for/list ([ch1 winner1] [ch2 winner2]
                #:when (char=? ch1 ch2))
       ch1)))
