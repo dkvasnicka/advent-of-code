@@ -30,9 +30,9 @@
     (if (char=? ch1 ch2) 0 1)))
 
 (match-define (list winner1 winner2)
-  (for*/last ([id1 data] [id2 data]
-              #:unless (eq? id1 id2)
-              #:final (= 1 (similarity id1 id2)))
+  (for*/first ([id1 data] [id2 data]
+              #:when (and (not (eq? id1 id2))
+                          (= 1 (similarity id1 id2))))
     (list id1 id2)))
 
 (displayln
