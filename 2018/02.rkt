@@ -21,13 +21,13 @@
 
 ; Part 2
 (define (similarity id1 id2)
-  (for/sum ([ch1 id1] [ch2 id2])
-    (if (char=? ch1 ch2) 0 1)))
+  (for/fold ([accum 0]) ([ch1 id1] [ch2 id2] #:break (= accum 2))
+    (if (char=? ch1 ch2) accum (add1 accum))))
 
 (match-define (list winner1 winner2)
   (for*/first ([id1 data] [id2 data]
-              #:when (and (not (eq? id1 id2))
-                          (= 1 (similarity id1 id2))))
+               #:unless (or (eq? id1 id2)
+                            (> (similarity id1 id2) 1)))
     (list id1 id2)))
 
 (displayln
