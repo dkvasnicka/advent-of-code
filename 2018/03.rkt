@@ -23,7 +23,14 @@
         (array-count (λ ([x : Integer]) (> x 1)) fabric))
 
       ; Part 2
-      )))
+      (for ([rect data] [i (in-naturals)])
+        (when (= (array-all-max
+                   (array-slice-ref fabric
+                                    (list
+                                      (:: (second rect) (+ (second rect) (fourth rect)))
+                                      (:: (first rect) (+ (first rect) (third rect))))))
+                 1)
+              (displayln (add1 i)))))))
 
 (require 'algo)
 (define data
