@@ -49,8 +49,8 @@
 
 (define data
   (for/stream ([l (in-lines)])
-    (let ([spec (map string->number (rest (regexp-match spec-regex l)))])
-      (claim (first spec) (+ (first spec) (third spec))
-             (second spec) (+ (second spec) (fourth spec))))))
+    (match-let ([(list _ xl yt width height)
+                 (map string->number (regexp-match spec-regex l))])
+      (claim xl (+ xl width) yt (+ yt height)))))
 
 (solve-puzzles data)
