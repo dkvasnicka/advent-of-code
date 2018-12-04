@@ -2,7 +2,12 @@
 
 (module algo typed/racket
   (require math/array)
-  (provide solve-puzzles)
+  (provide solve-puzzles claim)
+
+  (struct claim
+    ([xl : Natural] [xr : Natural]
+     [yt : Natural] [yb : Natural])
+    #:transparent)
 
   (: array-update! ((Mutable-Array Integer) In-Indexes (Integer -> Integer) -> Void))
   (define (array-update! arr js updater)
@@ -10,12 +15,12 @@
       (when (< current 2)
         (array-set! arr js (updater current)))))
 
-  (: solve-puzzles ((Sequenceof (Listof Integer)) -> Void))
+  (: solve-puzzles ((Sequenceof claim) -> Void))
   (define (solve-puzzles data)
     (let ([fabric (array->mutable-array (make-array #[1000 1000] 0))])
       (for ([rect data])
-        (for* ([x (in-range (first rect) (+ (first rect) (third rect)))]
-               [y (in-range (second rect) (+ (second rect) (fourth rect)))])
+        (for* ([x (in-range (claim-xl rect) (claim-xr rect))]
+               [y (in-range (claim-yt rect) (claim-yb rect))])
           (array-update! fabric (vector y x) add1)))
 
       ; Part 1
@@ -23,20 +28,29 @@
         (array-count (λ ([x : Integer]) (> x 1)) fabric))
 
       ; Part 2
-      (for ([rect data] [i (in-naturals)])
-        (when (= (array-all-max
-                   (array-slice-ref fabric
-                                    (list
-                                      (:: (second rect) (+ (second rect) (fourth rect)))
-                                      (:: (first rect) (+ (first rect) (third rect))))))
-                 1)
-              (displayln (add1 i)))))))
+      (: non-overlapping? (claim -> Boolean))
+      (define (non-overlapping? rect)
+        (= (array-all-max
+             (array-slice-ref fabric
+                              (list
+                                (:: (claim-yt rect) (claim-yb rect))
+                                (:: (claim-xl rect) (claim-xr rect)))))
+           1))
+
+      (displayln
+        (for/fold ([result 0])
+                  ([rect data]
+                   [i (in-naturals)] #:final (non-overlapping? rect))
+          (add1 i))))))
 
 (require 'algo)
+
+(define spec-regex #px"([0-9]+),([0-9]+):\\s([0-9]+)x([0-9]+)")
+
 (define data
   (for/stream ([l (in-lines)])
-    (map string->number
-         (rest
-           (regexp-match #px"([0-9]+),([0-9]+):\\s([0-9]+)x([0-9]+)" l)))))
+    (let ([spec (map string->number (rest (regexp-match spec-regex l)))])
+      (claim (first spec) (+ (first spec) (third spec))
+             (second spec) (+ (second spec) (fourth spec))))))
 
 (solve-puzzles data)
