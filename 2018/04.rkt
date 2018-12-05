@@ -2,6 +2,7 @@
 
 (require (file "~/Library/Racket/7.0/pkgs/ftree/intervaltree/main.rkt")
          (file "~/Library/Racket/7.0/pkgs/ftree/ftree/main.rkt")
+         "utils.rkt"
          data/splay-tree
          mischief/for
          gregor)
@@ -20,38 +21,32 @@
     (let ([logentry (rest (regexp-match log-pattern l))])
       (parse logentry))))
 
-(define-values (_ guard-records __)
+(define-values (_ guard-records total-sleeps __)
   (for/fold ([current-guard #f]
              [records (hasheq)]
+             [total-sleeps (hasheq)]
              [current-interval-start #f])
     ([(timestamp evt) (in-dict data)])
     (match evt
-      [(? number? guard-id) (values guard-id records current-interval-start)]
-      ["falls asleep" (values current-guard records (->minutes timestamp))]
+      [(? number? guard-id) (values guard-id records total-sleeps current-interval-start)]
+      ["falls asleep" (values current-guard records total-sleeps (->minutes timestamp))]
       ["wakes up" (values
                     current-guard
                     (hash-update records
                                  current-guard
                                  (curry it-insert current-interval-start (sub1 (->minutes timestamp)))
                                  (λ () (mk-itree)))
+                    (hash-update total-sleeps
+                                 current-guard
+                                 (curry + (- (->minutes timestamp) current-interval-start))
+                                 0)
                     #f)])))
 
 ; Part 1
-(define (sleep-duration it)
-  (for/sum ([snooze (it-match it 0 60)])
-    (- (interval-high snooze) (interval-low snooze) -1)))
-
-(define-values (___ sleepyhead-id sleepyhead-records)
-  (for/fold ([minutes-slept 0]
-             [sleepyhead-id #f]
-             [sleepyhead-records #f])
-    ([(guard-id intervals) (in-hash guard-records)])
-    (let ([sleep (sleep-duration intervals)])
-      (if (> sleep minutes-slept)
-          (values sleep guard-id intervals)
-          (values minutes-slept sleepyhead-id sleepyhead-records)))))
-
 (displayln
-  (* sleepyhead-id
-     (argmax (λ (i) (length (it-match sleepyhead-records i i)))
-             (range 0 60))))
+  (match-let* ([(cons sleepyhead-id _)
+                (sequence-argmax cdr (in-hash-pairs total-sleeps))]
+               [sleepyhead-records (hash-ref guard-records sleepyhead-id)])
+    (* sleepyhead-id
+       (sequence-argmax (λ (i) (length (it-match sleepyhead-records i i)))
+                        (in-range 0 60)))))
