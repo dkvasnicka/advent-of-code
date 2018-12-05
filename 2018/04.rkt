@@ -1,7 +1,6 @@
 #lang racket
 
 (require (file "~/Library/Racket/7.0/pkgs/ftree/intervaltree/main.rkt")
-         (file "~/Library/Racket/7.0/pkgs/ftree/ftree/main.rkt")
          "utils.rkt"
          data/splay-tree
          mischief/for
@@ -21,11 +20,9 @@
     (let ([logentry (rest (regexp-match log-pattern l))])
       (parse logentry))))
 
-(define-values (_ guard-records total-sleeps __)
-  (for/fold ([current-guard #f]
-             [records (hasheq)]
-             [total-sleeps (hasheq)]
-             [current-interval-start #f])
+(define-values (guard-records total-sleeps)
+  (for/fold ([current-guard #f] [records (hasheq)] [total-sleeps (hasheq)] [current-interval-start #f]
+             #:result (values records total-sleeps))
     ([(timestamp evt) (in-dict data)])
     (match evt
       [(? number? guard-id) (values guard-id records total-sleeps current-interval-start)]
@@ -43,24 +40,22 @@
                     #f)])))
 
 ; Part 1
-(define ((intersecting-intervals recs) point)
+(define ((intervals-on-minute recs) point)
   (length (it-match recs point point)))
 
 (displayln
-  (match-let* ([(cons sleepyhead-id _)
-                (sequence-argmax cdr (in-hash-pairs total-sleeps))]
+  (match-let* ([(cons sleepyhead-id _) (sequence-argmax cdr (in-hash-pairs total-sleeps))]
                [sleepyhead-records (hash-ref guard-records sleepyhead-id)])
     (* sleepyhead-id
-       (sequence-argmax (intersecting-intervals sleepyhead-records)
+       (sequence-argmax (intervals-on-minute sleepyhead-records)
                         (in-range 0 60)))))
 
 ; Part 2
-(define-values (most-predictable-sleeper ___ sleepiest-minute)
+(define-values (most-predictable-sleeper _ sleepiest-minute)
   (for/fold ([most-predictable-sleeper #f] [max-sleeps -inf.0] [sleepiest-minute #f])
             ([(guard-id records) guard-records])
-    (let-values ([(sleeps top-min)
-                  (sequence-argmax/maxval (intersecting-intervals records)
-                                          (in-range 0 60))])
+    (let-values ([(sleeps top-min) (sequence-argmax/maxval (intervals-on-minute records)
+                                                           (in-range 0 60))])
       (if (> sleeps max-sleeps)
           (values guard-id sleeps top-min)
           (values most-predictable-sleeper max-sleeps sleepiest-minute)))))
