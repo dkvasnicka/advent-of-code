@@ -43,10 +43,26 @@
                     #f)])))
 
 ; Part 1
+(define ((intersecting-intervals recs) point)
+  (length (it-match recs point point)))
+
 (displayln
   (match-let* ([(cons sleepyhead-id _)
                 (sequence-argmax cdr (in-hash-pairs total-sleeps))]
                [sleepyhead-records (hash-ref guard-records sleepyhead-id)])
     (* sleepyhead-id
-       (sequence-argmax (λ (i) (length (it-match sleepyhead-records i i)))
+       (sequence-argmax (intersecting-intervals sleepyhead-records)
                         (in-range 0 60)))))
+
+; Part 2
+(define-values (most-predictable-sleeper ___ sleepiest-minute)
+  (for/fold ([most-predictable-sleeper #f] [max-sleeps -inf.0] [sleepiest-minute #f])
+            ([(guard-id records) guard-records])
+    (let-values ([(sleeps top-min)
+                  (sequence-argmax/maxval (intersecting-intervals records)
+                                          (in-range 0 60))])
+      (if (> sleeps max-sleeps)
+          (values guard-id sleeps top-min)
+          (values most-predictable-sleeper max-sleeps sleepiest-minute)))))
+
+(displayln (* most-predictable-sleeper sleepiest-minute))
