@@ -1,6 +1,7 @@
 #lang racket
 
-(require srfi/14 "utils.rkt")
+(require srfi/14
+         (prefix-in c: data/collection))
 
 (define data (sequence->stream (in-port read-char)))
 
@@ -25,6 +26,7 @@
   (let ([input (stream-filter (compose not (curry char-ci=? ch)) data)])
     (trigger-reaction (stream-rest input) (list (stream-first input)))))
 
-(sequence-argmin/minval
-  reaction-length-without
-  (char-set->list (char-set-intersection char-set:lower-case char-set:ascii)))
+(c:find-min
+  (c:map reaction-length-without
+         (char-set->list
+           (char-set-intersection char-set:lower-case char-set:ascii))))

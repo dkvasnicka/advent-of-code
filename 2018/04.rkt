@@ -1,7 +1,7 @@
 #lang racket
 
 (require (file "~/Library/Racket/7.0/pkgs/ftree/intervaltree/main.rkt")
-         "utils.rkt"
+         (prefix-in c: data/collection)
          data/splay-tree
          mischief/for
          gregor)
@@ -44,18 +44,19 @@
   (length (it-match recs point point)))
 
 (displayln
-  (match-let* ([(cons sleepyhead-id _) (sequence-argmax cdr (in-hash-pairs total-sleeps))]
+  (match-let* ([(cons sleepyhead-id _) (c:find-max total-sleeps #:key cdr)]
                [sleepyhead-records (hash-ref guard-records sleepyhead-id)])
     (* sleepyhead-id
-       (sequence-argmax (intervals-on-minute sleepyhead-records)
-                        (in-range 0 60)))))
+       (c:find-max (in-range 0 60)
+                   #:key (intervals-on-minute sleepyhead-records)))))
 
 ; Part 2
 (define-values (most-predictable-sleeper _ sleepiest-minute)
   (for/fold ([most-predictable-sleeper #f] [max-sleeps -inf.0] [sleepiest-minute #f])
             ([(guard-id records) guard-records])
-    (let-values ([(sleeps top-min) (sequence-argmax/maxval (intervals-on-minute records)
-                                                           (in-range 0 60))])
+    (match-let ([(list sleeps top-min)
+                 (c:find-max #:key car (c:map (λ (m) (list ((intervals-on-minute records) m) m))
+                                              (in-range 0 60)))])
       (if (> sleeps max-sleeps)
           (values guard-id sleeps top-min)
           (values most-predictable-sleeper max-sleeps sleepiest-minute)))))
