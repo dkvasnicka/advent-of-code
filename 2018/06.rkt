@@ -18,6 +18,7 @@
   (+ (abs (- (pt-x a) (pt-x b)))
      (abs (- (pt-y a) (pt-y b)))))
 
+; Part 1
 (define candidates
   (filter (λ (p) (and (> (pt-x p) min-x) (> (pt-y p) min-y)
                       (< (pt-x p) max-x) (< (pt-y p) max-y)))
@@ -36,7 +37,6 @@
                     1 0)))
       c)))
 
-; Part 1
 (displayln
   (time (argmax first (map compute-area candidates))))
 
