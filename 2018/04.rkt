@@ -51,14 +51,13 @@
                    #:key (intervals-on-minute sleepyhead-records)))))
 
 ; Part 2
-(define-values (most-predictable-sleeper _ sleepiest-minute)
-  (for/fold ([most-predictable-sleeper #f] [max-sleeps -inf.0] [sleepiest-minute #f])
-            ([(guard-id records) guard-records])
-    (match-let ([(list sleeps top-min)
-                 (c:find-max #:key car (c:map (λ (m) (list ((intervals-on-minute records) m) m))
-                                              (in-range 0 60)))])
-      (if (> sleeps max-sleeps)
-          (values guard-id sleeps top-min)
-          (values most-predictable-sleeper max-sleeps sleepiest-minute)))))
+(define/for/fold ([most-predictable-sleeper #f] [max-sleeps -inf.0] [sleepiest-minute #f])
+                 ([(guard-id records) guard-records])
+  (match-let ([(list sleeps top-min)
+               (c:find-max #:key car (c:map (λ (m) (list ((intervals-on-minute records) m) m))
+                                            (in-range 0 60)))])
+    (if (> sleeps max-sleeps)
+        (values guard-id sleeps top-min)
+        (values most-predictable-sleeper max-sleeps sleepiest-minute))))
 
 (displayln (* most-predictable-sleeper sleepiest-minute))

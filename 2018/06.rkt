@@ -1,19 +1,18 @@
 #lang racket
 
-(require math/statistics
-         threading)
+(require threading
+         mischief/for)
 
 (struct pt (x y) #:transparent)
 
-(define-values (data min-x min-y max-x max-y)
-  (for/fold ([data '()]
-             [min-x +inf.0] [min-y +inf.0] [max-x -inf.0] [max-y -inf.0])
-            ([l (in-lines)])
-    (match-let ([(list x y)
-                 (map (compose string->number string-trim) (string-split l ","))])
-      (values
-        (cons (pt x y) data)
-        (min min-x x) (min min-y y) (max max-x x) (max max-y y)))))
+(define/for/fold ([data '()]
+                  [min-x +inf.0] [min-y +inf.0] [max-x -inf.0] [max-y -inf.0])
+                 ([l (in-lines)])
+  (match-let ([(list x y)
+               (map (compose string->number string-trim) (string-split l ","))])
+    (values
+      (cons (pt x y) data)
+      (min min-x x) (min min-y y) (max max-x x) (max max-y y))))
 
 (define (manhattan-dist a b)
   (+ (abs (- (pt-x a) (pt-x b)))
@@ -37,4 +36,14 @@
                     1 0)))
       c)))
 
-(argmax first (map compute-area candidates))
+; Part 1
+(displayln
+  (time (argmax first (map compute-area candidates))))
+
+; Part 2
+(displayln
+  (time
+    (for*/sum ([x (in-range min-x (add1 max-x))]
+               [y (in-range min-y (add1 max-y))])
+      (if (< (for/sum ([p data]) (manhattan-dist (pt x y) p)) 10000)
+          1 0))))
