@@ -32,7 +32,7 @@
                     (hash-update records
                                  current-guard
                                  (curry it-insert current-interval-start (sub1 (->minutes timestamp)))
-                                 (λ () (mk-itree)))
+                                 mk-itree)
                     (hash-update total-sleeps
                                  current-guard
                                  (curry + (- (->minutes timestamp) current-interval-start))
