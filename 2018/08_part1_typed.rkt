@@ -1,6 +1,7 @@
 #lang typed/racket/base
 
-(require/typed racket/base [read (-> Natural)])
+(require typed/racket/unsafe)
+(unsafe-require/typed racket/base [read (-> Natural)])
 
 (time
   (let loop : Natural ()
