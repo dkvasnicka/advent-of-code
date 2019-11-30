@@ -15,7 +15,8 @@
                            (num = (digit-char-p c))
                            (chars when num collect num))))
            (head (car data)))
-      (process head (cdr data) 0 head))))
+      (process head (cdr data) 0 head)))
+  (quit))
 
 ; (series:collect
 ; (series:choose-if #'alphanumericp
