@@ -11,7 +11,7 @@
 ; persistent RA list in one stream and then updating it
 ; using a properly tail-recursive function
 
-(defvar *gravity-assist-program*
+(defvar *program*
   (ra-reverse
     (collect-fn (type-of (ra-list)) #'ra-list (lambda (xs x) (ra-cons x xs))
                 (map-fn 'integer #'parse-integer
@@ -36,7 +36,24 @@
         (instruction-cycle (+ idx 4)
                            (exec-instruction code idx prg)))))
 
-(defun main ()
-  (ra-car (instruction-cycle 0 *gravity-assist-program*)))
+(defun println (v) (format t "~a~%" v))
 
-(princ (main))
+(defun fulfills-condition? (noun verb)
+  (let ((part2-input (ra-list-set (ra-list-set *program* 1 noun) 2 verb)))
+    (when (= 19690720 (ra-car (instruction-cycle 0 part2-input)))
+      verb)))
+
+(defun main ()
+  ; Part 1
+  (println
+    (ra-car
+      (instruction-cycle 0 *program*)))
+
+  ; Part 2
+  (println
+    (for:for ((noun :from 0 :to 99)
+              (verb = (for:for ((verb :from 0 :to 99))
+                        (:thereis (fulfills-condition? noun verb)))))
+             (:thereis
+               (when verb
+                 (+ (* 100 noun) verb))))))
