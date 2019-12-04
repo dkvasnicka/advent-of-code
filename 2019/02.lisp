@@ -54,6 +54,5 @@
     (for:for ((noun :from 0 :to 99)
               (verb = (for:for ((verb :from 0 :to 99))
                         (:thereis (fulfills-condition? noun verb)))))
-             (:thereis
-               (when verb
-                 (+ (* 100 noun) verb))))))
+             (:until verb)
+             (:returning (+ (* 100 noun) verb)))))
