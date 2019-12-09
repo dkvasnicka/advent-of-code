@@ -1,21 +1,16 @@
+(require "taps")
 (require "str")
 (require "cl-geometry")
 (defpackage #:aoc2019d03
-  (:use :cl :cl-geometry :serapeum))
+  (:use :cl :cl-geometry :series))
 (in-package #:aoc2019d03)
+(defparameter *suppress-series-warnings* t)
 
 (defun parse-instruction (instr)
   (cons (intern (str:s-first instr))
         (parse-integer (str:s-rest instr))))
 
-(defun read-wirespec ()
-  (map 'list #'parse-instruction
-       (str:split "," (read-line))))
-
-(defvar *l1-wirespec* (read-wirespec))
-(defvar *l2-wirespec* (read-wirespec))
-
-(defalias pt (partial #'make-instance 'geometry:point))
+(serapeum:defalias pt (serapeum:partial #'make-instance 'geometry:point))
 
 (defun next-end (current-end instruction)
   (ecase (car instruction)
@@ -35,9 +30,14 @@
                          :end (next-end current-end instruction))
           segs)))
 
+(defun read-wirespec (line-string)
+  (collect-fn 'list (lambda () (list (make-instance 'geometry:line-segment)))
+              #'build-segment
+              (map-fn 'list #'parse-instruction
+                      (taps:tap :words line-string))))
+
+(defvar *wire1* (read-wirespec (read-line)))
+(defvar *wire2* (read-wirespec (read-line)))
+
 (defun main ()
-  ; (princ (next-end (make-instance 'geometry:point) (cons 'R 3)))
-  (princ (reduce #'build-segment *l1-wirespec*
-                 :initial-value (list (make-instance
-                                        'geometry:line-segment))))
-  )
+  (princ *wire1*)) ; TODO for:for
