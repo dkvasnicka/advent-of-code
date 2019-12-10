@@ -13,14 +13,14 @@
 
 (defun next-end (current-end instruction)
   (ecase (car instruction)
-    ('R (pt :x (+ (cdr instruction) (x current-end))
-            :y (y current-end)))
-    ('L (pt :x (- (x current-end) (cdr instruction))
-            :y (y current-end)))
-    ('U (pt :x (x current-end)
-            :y (+ (cdr instruction) (y current-end))))
-    ('D (pt :x (x current-end)
-            :y (- (y current-end) (cdr instruction))))))
+    (R (pt :x (+ (cdr instruction) (x current-end))
+           :y (y current-end)))
+    (L (pt :x (- (x current-end) (cdr instruction))
+           :y (y current-end)))
+    (U (pt :x (x current-end)
+           :y (+ (cdr instruction) (y current-end))))
+    (D (pt :x (x current-end)
+           :y (- (y current-end) (cdr instruction))))))
 
 (defvar *origin* (make-instance 'point))
 
