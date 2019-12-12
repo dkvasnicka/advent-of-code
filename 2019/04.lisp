@@ -1,5 +1,6 @@
 (defpackage #:aoc2019d04
-  (:use :cl :iterate :alexandria))
+  (:use :cl :iterate :alexandria :serapeum)
+  (:shadowing-import-from :iterate collecting summing sum in))
 (in-package #:aoc2019d04)
 
 (defun number->digits (n)
@@ -14,7 +15,7 @@
 
 (defun srsly-password? (digits)
   (and (apply #'<= digits)
-       (some (serapeum:of-length 2) (serapeum:runs digits))))
+       (some (of-length 2) (runs digits))))
 
 (defun main ()
   (princ
