@@ -14,9 +14,7 @@
 
 (defun srsly-password? (n)
   (let ((digits (map 'list #'digit-char-p (write-to-string n))))
-    (and (iter (for x in digits)
-               (for y previous x initially -1)
-               (always (>= x y)))
+    (and (apply #'<= digits)
          (some #'has-two-items? (serapeum:runs digits)))))
 
 (defun main ()
