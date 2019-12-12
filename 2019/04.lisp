@@ -2,8 +2,11 @@
   (:use :cl :iterate :alexandria))
 (in-package #:aoc2019d04)
 
+(defun number->digits (n)
+  (map 'list #'digit-char-p (write-to-string n)))
+
 (defun password? (n)
-  (iter (for x in (map 'list #'digit-char-p (write-to-string n)))
+  (iter (for x in (number->digits n))
         (for y previous x initially -1)
         (always (>= x y))
         (reducing (= x y) by #'or into res)
@@ -13,7 +16,7 @@
   (= 2 (length l)))
 
 (defun srsly-password? (n)
-  (let ((digits (map 'list #'digit-char-p (write-to-string n))))
+  (let ((digits (number->digits n)))
     (and (apply #'<= digits)
          (some #'has-two-items? (serapeum:runs digits)))))
 
