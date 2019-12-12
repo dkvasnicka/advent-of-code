@@ -5,8 +5,8 @@
 (defun number->digits (n)
   (map 'list #'digit-char-p (write-to-string n)))
 
-(defun password? (n)
-  (iter (for x in (number->digits n))
+(defun password? (digits)
+  (iter (for x in digits)
         (for y previous x initially -1)
         (always (>= x y))
         (reducing (= x y) by #'or into res)
@@ -15,14 +15,14 @@
 (defun has-two-items? (l)
   (= 2 (length l)))
 
-(defun srsly-password? (n)
-  (let ((digits (number->digits n)))
-    (and (apply #'<= digits)
-         (some #'has-two-items? (serapeum:runs digits)))))
+(defun srsly-password? (digits)
+  (and (apply #'<= digits)
+       (some #'has-two-items? (serapeum:runs digits))))
 
 (defun main ()
   (princ
     (iter (for pwd from 273025 to 767253)
-          (counting (password? pwd) into p1)
-          (counting (srsly-password? pwd) into p2)
+          (let ((digits (number->digits pwd)))
+            (counting (password? digits) into p1)
+            (counting (srsly-password? digits) into p2))
           (finally (return (list p1 p2))))))
