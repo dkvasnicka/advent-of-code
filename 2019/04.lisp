@@ -12,12 +12,9 @@
         (reducing (= x y) by #'or into res)
         (finally (return res))))
 
-(defun has-two-items? (l)
-  (= 2 (length l)))
-
 (defun srsly-password? (digits)
   (and (apply #'<= digits)
-       (some #'has-two-items? (serapeum:runs digits))))
+       (some (serapeum:of-length 2) (serapeum:runs digits))))
 
 (defun main ()
   (princ
