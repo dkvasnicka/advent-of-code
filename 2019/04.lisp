@@ -1,6 +1,7 @@
 (defpackage #:aoc2019d04
-  (:use :cl :iterate :alexandria :serapeum)
-  (:shadowing-import-from :iterate collecting summing sum in))
+  (:use :cl :iterate :alexandria :serapeum :parachute)
+  (:shadowing-import-from :iterate collecting summing sum in)
+  (:shadowing-import-from :parachute of-type featurep finish true))
 (in-package #:aoc2019d04)
 
 (defun number->digits (n)
@@ -24,3 +25,11 @@
             (counting (password? digits) into p1)
             (counting (srsly-password? digits) into p2))
           (finally (return (list p1 p2))))))
+
+(define-test passwords
+  (true (password? '(1 2 2 2 3 4)))
+  (false (password? '(1 2 2 3 4 3)))
+  (true (srsly-password? '(1 2 2 2 3 3 4)))
+  (false (srsly-password? '(1 2 2 2 3))))
+
+(test *package*)
