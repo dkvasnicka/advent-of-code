@@ -25,8 +25,7 @@
         (accumulate (split-sequence #\) l) by #'add-nodes-and-edge
                     initial-value (make-graph)
                     into g)
-        (finally
-          (return g))))
+        (finally (return g))))
 
 (defun path-to-santa (g)
   (- (length (find-shortest-path g "YOU" "SAN"))
