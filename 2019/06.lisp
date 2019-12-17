@@ -1,6 +1,6 @@
 (require "graph-utils")
 (defpackage #:aoc2019d06
-  (:use :cl :iterate :alexandria :serapeum :rove :graph-utils)
+  (:use :cl :iterate :alexandria :serapeum :graph-utils)
   (:shadowing-import-from :iterate collecting summing sum in)
   (:shadowing-import-from :graph-utils select))
 (in-package #:aoc2019d06)
