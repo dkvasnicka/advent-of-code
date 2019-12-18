@@ -18,9 +18,17 @@
                       :initial-value (fset:empty-map) :into hists)
           (finally (return hists)))))
 
+(defun find-layer-with-least-0 (hists)
+  (let ((hist-iterator (fset:iterator hists)))
+    (iter (for (values layer-id h more?) next (funcall hist-iterator :get))
+          (until (null more?))
+          (finding h minimizing (or (fset:@ h #\0)
+                                    sb-ext:double-float-positive-infinity)))))
+
 (defun main ()
   (princ
-    (build-histograms *standard-input* 25 6)))
+    (let ((layer (find-layer-with-least-0 (build-histograms *standard-input* 25 6))))
+      (* (fset:@ layer #\1) (fset:@ layer #\2)))))
 
 (define-test histograms
   (is equalp
