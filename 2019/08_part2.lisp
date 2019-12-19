@@ -13,9 +13,15 @@
               '()
               (read-layers is w h)))))
 
+(defun fold-pixels (&rest pixels)
+  (ecase (or (find-if (partial #'> 2) pixels) 2)
+    (1 #\FULL_BLOCK)
+    (0 #\Space)))
+
 (defun main ()
   (princ
-    (read-layers *standard-input* 25 6)))
+    (apply (partial #'aops:each #'fold-pixels)
+           (read-layers *standard-input* 25 6))))
 
 (define-test "read layers into a list of 2D arrays"
   (is equalp
