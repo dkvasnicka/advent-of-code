@@ -1,6 +1,6 @@
-(require "fset")
+(require "hash-set")
 (defpackage #:aoc2019d10
-  (:use :cl :iterate :alexandria :serapeum :parachute)
+  (:use :cl :iterate :alexandria :serapeum :parachute :hash-set)
   (:shadowing-import-from :iterate collecting until finish collect summing sum in)
   (:shadowing-import-from :parachute of-type featurep true))
 (in-package #:aoc2019d10)
@@ -20,10 +20,11 @@
             (- (pt-x a) (pt-x s)))))
 
 (defun count-visible-asteroids (station asteroids)
-  (fset:size
-    (gmap:gmap (:set :filterp #'true)
-               (partial #'angle station)
-               (:list asteroids))))
+  (iter (for a in asteroids)
+        (when-let (alpha (angle station a))
+          (accumulate alpha :by (flip #'hs-ninsert)
+                      :initial-value (make-hash-set) :into angles))
+        (finally (return (hs-count angles)))))
 
 (defun main ()
   (princ
