@@ -1,6 +1,6 @@
-(require "hash-set")
+(require "hh-redblack")
 (defpackage #:aoc2019d10
-  (:use :cl :iterate :alexandria :serapeum :parachute :hash-set)
+  (:use :cl :iterate :alexandria :serapeum :parachute :hh-redblack)
   (:shadowing-import-from :iterate collecting until finish collect summing sum in)
   (:shadowing-import-from :parachute of-type featurep true))
 (in-package #:aoc2019d10)
@@ -10,27 +10,29 @@
 (defun read-asteroids (s size)
   (iter (for idx from 0 below (expt size 2))
         (when (eq (read-char s) #\#)
-              (collect (mvlet ((y x (floor idx size)))
-                         (make-pt :x x :y y))))))
+          (collect (mvlet ((y x (floor idx size)))
+                     (make-pt :x x :y y))))))
+
+(defun in-radians (s a)
+  (atan (- (pt-x a) (pt-x s))
+        (- (pt-y a) (pt-y s))))
 
 (defun angle (s a)
-  (if (equalp s a)
-      nil
-      (let ((degrees (round-to
-                       (* (/ 180 pi) (atan (- (pt-x a) (pt-x s))
-                                           (- (pt-y a) (pt-y s))))
-                       0.00001)))
-        (if (minusp degrees)
-            (+ degrees 360)
-            degrees))))
+  (let ((degrees (round-to (* (/ 180 pi) (in-radians s a)) 0.00001)))
+    (if (minusp degrees)
+        (+ degrees 360)
+        degrees)))
+
+(defun add-asteroid (a accum)
+  (rb-put accum a t)
+  accum)
 
 (defun count-visible-asteroids (station asteroids)
   (iter (for a in asteroids)
-        (when-let (alpha (angle station a))
-          ; TODO: RB-tree????
-          (accumulate alpha :by (flip #'hs-ninsert)
-                      :initial-value (make-hash-set) :into angles))
-        (finally (return (hs-count angles)))))
+        (unless (equalp a station)
+          (accumulate (angle station a) :by #'add-asteroid
+                      :initial-value (make-red-black-tree) :into angles))
+        (finally (return (rb-size angles)))))
 
 (defun main ()
   (princ
