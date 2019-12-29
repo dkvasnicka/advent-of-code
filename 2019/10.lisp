@@ -23,14 +23,25 @@
         (+ degrees 360)
         degrees)))
 
-(defun add-asteroid (a accum)
-  (rb-put accum a t)
-  accum)
+(defun dist (s a)
+  (sqrt (+ (expt (- (pt-x s) (pt-x a)) 2)
+           (expt (- (pt-y s) (pt-y a)) 2))))
+
+(defun add-asteroid (polar accum)
+  (destructuring-bind (a d) polar
+    (mvlet ((val present? (rb-get accum a)))
+      (if present?
+          (heap-insert val d)
+          (let ((new-heap (make-heap :test #'<)))
+            (heap-insert new-heap d)
+            (rb-put accum a new-heap)))
+      accum)))
 
 (defun count-visible-asteroids (station asteroids)
   (iter (for a in asteroids)
         (unless (equalp a station)
-          (accumulate (angle station a) :by #'add-asteroid
+          (accumulate (list (angle station a)
+                            (dist station a)) :by #'add-asteroid
                       :initial-value (make-red-black-tree) :into angles))
         (finally (return (rb-size angles)))))
 
