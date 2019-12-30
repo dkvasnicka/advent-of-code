@@ -1,18 +1,14 @@
-(require "hh-redblack")
+(require "cl-containers")
 (defpackage #:aoc2019d10
-  (:use :cl :iterate :alexandria :serapeum :parachute :hh-redblack)
+  (:use :cl :iterate :alexandria :serapeum :parachute :metabang.cl-containers)
   (:shadowing-import-from :iterate collecting until finish collect summing sum in)
-  (:shadowing-import-from :parachute of-type featurep true))
+  (:shadowing-import-from :serapeum filter)
+  (:shadowing-import-from :parachute of-type children parent featurep true))
 (in-package #:aoc2019d10)
 
 (defstruct pt x y)
 (defstruct polar-pt p r)
-
-(defmethod rb< ((left number) (right number))
-  "We need to reverse the angle ordering because given how
-   the problem is defined the standard angle formulas produce
-   CCW movement"
-  (> left right))
+(defstruct line-of-sight α as)
 
 (defun read-asteroids (s size)
   (iter (for idx from 0 below (expt size 2))
@@ -34,12 +30,12 @@
 
 (defun add-asteroid (polar accum)
   (destructuring-bind (φ ast) polar
-    (mvlet ((val present? (rb-get accum φ)))
-      (if present?
-          (heap-insert val ast)
+    (let ((val (item-at accum φ)))
+      (if val
+          (heap-insert (line-of-sight-as (element val)) ast)
           (let ((new-heap (make-heap :key #'polar-pt-r :test #'<)))
             (heap-insert new-heap ast)
-            (rb-put accum φ new-heap)))
+            (insert-new-item accum (make-line-of-sight :α φ :as new-heap))))
       accum)))
 
 (defun sky-map (station asteroids)
@@ -49,26 +45,21 @@
                             (let ((r (dist station a)))
                               (make-polar-pt :p a :r r)))
                       :by #'add-asteroid
-                      :initial-value (make-red-black-tree)))))
+                      :initial-value (make-instance 'red-black-tree
+                                                    :sorter #'>
+                                                    :key #'line-of-sight-α)))))
 
 (defun encode-200th-vaporized (mp)
-  "Hideous imperative/mutable function
-   because the hh-redblack API sucks donkey balls"
-  (setq i 1)
-  (setq result nil)
-  (with-rb-keys-and-data (_ as) mp
-    (incf i)
-    (when (= i 200)
-      (let ((closest (polar-pt-p (heap-maximum as))))
-        (setf result (+ (* 100 (pt-x closest))
-                        (pt-y closest))))))
-  result)
+  (let* ((_200th (line-of-sight-as (nth-element mp 198)))
+         (closest (polar-pt-p (heap-maximum _200th))))
+    (+ (* 100 (pt-x closest))
+       (pt-y closest))))
 
 (defun main ()
   (mvlet* ((asteroids (read-asteroids *standard-input* 27))
            (best-map visible (iter (for a in asteroids)
                                    (finding (sky-map a asteroids)
-                                            maximizing #'rb-size into (bm siz))
+                                            maximizing #'size into (bm siz))
                                    (finally (return (values bm siz))))))
           ; Part 1
           (format t "~a~%" visible)
