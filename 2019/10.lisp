@@ -6,6 +6,10 @@
 (in-package #:aoc2019d10)
 
 (defstruct pt x y)
+(defstruct polar-pt p r)
+
+(defmethod rb< ((left number) (right number))
+  (> left right))
 
 (defun read-asteroids (s size)
   (iter (for idx from 0 below (expt size 2))
@@ -13,44 +17,56 @@
           (collect (mvlet ((y x (floor idx size)))
                      (make-pt :x x :y y))))))
 
-(defun in-radians (s a)
+(defun in-radians (a s)
   (atan (- (pt-x a) (pt-x s))
         (- (pt-y a) (pt-y s))))
 
 (defun angle (s a)
-  (let ((degrees (round-to (* (/ 180 pi) (in-radians s a)) 0.00001)))
-    (if (minusp degrees)
-        (+ degrees 360)
-        degrees)))
+  (let ((α (round-to (* (/ 180 pi) (in-radians s a)) 0.00001)))
+    (if (minusp α) (+ α 360) α)))
 
 (defun dist (s a)
   (sqrt (+ (expt (- (pt-x s) (pt-x a)) 2)
            (expt (- (pt-y s) (pt-y a)) 2))))
 
 (defun add-asteroid (polar accum)
-  (destructuring-bind (a d) polar
-    (mvlet ((val present? (rb-get accum a)))
+  (destructuring-bind (φ ast) polar
+    (mvlet ((val present? (rb-get accum φ)))
       (if present?
-          (heap-insert val d)
-          (let ((new-heap (make-heap :test #'<)))
-            (heap-insert new-heap d)
-            (rb-put accum a new-heap)))
+          (heap-insert val ast)
+          (let ((new-heap (make-heap :key #'polar-pt-r :test #'<)))
+            (heap-insert new-heap ast)
+            (rb-put accum φ new-heap)))
       accum)))
 
-(defun count-visible-asteroids (station asteroids)
+(defun sky-map (station asteroids)
   (iter (for a in asteroids)
         (unless (equalp a station)
           (accumulate (list (angle station a)
-                            (dist station a)) :by #'add-asteroid
-                      :initial-value (make-red-black-tree) :into angles))
-        (finally (return (rb-size angles)))))
+                            (let ((r (dist station a)))
+                              (make-polar-pt :p a :r r)))
+                      :by #'add-asteroid
+                      :initial-value (make-red-black-tree)))))
+
+(defun encode-200th-vaporized (mp)
+  (setq i 0)
+  (setq result nil)
+  (with-rb-keys-and-data (_ as) mp
+    (incf i)
+    (when (= i 199)
+      (let ((closest (polar-pt-p (heap-maximum as))))
+        (setf result (+ (* 100 (pt-x closest))
+                        (pt-y closest))))))
+  result)
 
 (defun main ()
-  (princ
-    ; TODO: find maximizing; let & return a, count of angles, angles
-    (let ((asteroids (read-asteroids *standard-input* 27)))
-      (iter (for a in asteroids)
-            (maximize (count-visible-asteroids a asteroids))))))
+  (mvlet* ((asteroids (read-asteroids *standard-input* 27))
+           (best-map visible (iter (for a in asteroids)
+                                   (finding (sky-map a asteroids)
+                                            maximizing #'rb-size into (bm siz))
+                                   (finally (return (values bm siz))))))
+          (format t "~a~%" visible)
+          (princ (encode-200th-vaporized best-map))))
 
 (define-test "create a set of points"
   (is equalp
@@ -59,15 +75,15 @@
         (read-asteroids s 2))))
 
 (define-test "compute angle in 0-360 deg scale"
-  (is = 45 (angle (make-pt :x 0 :y 0)
-                  (make-pt :x 1 :y 1)))
-  (is = 135 (angle (make-pt :x 0 :y 0)
-                   (make-pt :x 1 :y -1)))
-  (is = 180 (angle (make-pt :x 0 :y 0)
-                   (make-pt :x 0 :y -1)))
   (is = 225 (angle (make-pt :x 0 :y 0)
-                   (make-pt :x -1 :y -1)))
+                   (make-pt :x 1 :y 1)))
   (is = 315 (angle (make-pt :x 0 :y 0)
+                   (make-pt :x 1 :y -1)))
+  (is = 0 (angle (make-pt :x 0 :y 0)
+                 (make-pt :x 0 :y -1)))
+  (is = 45 (angle (make-pt :x 0 :y 0)
+                  (make-pt :x -1 :y -1)))
+  (is = 135 (angle (make-pt :x 0 :y 0)
                    (make-pt :x -1 :y 1))))
 
 (test *package*)
