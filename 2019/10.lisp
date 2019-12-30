@@ -9,6 +9,9 @@
 (defstruct polar-pt p r)
 
 (defmethod rb< ((left number) (right number))
+  "We need to reverse the angle ordering because given how
+   the problem is defined the standard angle formulas produce
+   CCW movement"
   (> left right))
 
 (defun read-asteroids (s size)
@@ -17,9 +20,9 @@
           (collect (mvlet ((y x (floor idx size)))
                      (make-pt :x x :y y))))))
 
-(defun in-radians (a s)
-  (atan (- (pt-x a) (pt-x s))
-        (- (pt-y a) (pt-y s))))
+(defun in-radians (s a)
+  (atan (- (pt-x s) (pt-x a))
+        (- (pt-y s) (pt-y a))))
 
 (defun angle (s a)
   (let ((α (round-to (* (/ 180 pi) (in-radians s a)) 0.00001)))
@@ -49,11 +52,13 @@
                       :initial-value (make-red-black-tree)))))
 
 (defun encode-200th-vaporized (mp)
-  (setq i 0)
+  "Hideous imperative/mutable function
+   because the hh-redblack API sucks donkey balls"
+  (setq i 1)
   (setq result nil)
   (with-rb-keys-and-data (_ as) mp
     (incf i)
-    (when (= i 199)
+    (when (= i 200)
       (let ((closest (polar-pt-p (heap-maximum as))))
         (setf result (+ (* 100 (pt-x closest))
                         (pt-y closest))))))
@@ -65,7 +70,9 @@
                                    (finding (sky-map a asteroids)
                                             maximizing #'rb-size into (bm siz))
                                    (finally (return (values bm siz))))))
+          ; Part 1
           (format t "~a~%" visible)
+          ; Part 2
           (princ (encode-200th-vaporized best-map))))
 
 (define-test "create a set of points"
