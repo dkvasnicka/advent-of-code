@@ -7,8 +7,8 @@
 (in-package #:aoc2019d10)
 
 (defstruct pt x y)
-(defstruct polar-pt p r)
-(defstruct line-of-sight α as)
+(defstruct (pt-with-distance (:include pt)) r)
+(defstruct line-of-sight α items)
 
 (defun read-asteroids (s size)
   (iter (for idx from 0 below (expt size 2))
@@ -32,10 +32,10 @@
   (destructuring-bind (φ ast) polar
     (let ((val (item-at accum φ)))
       (if val
-          (heap-insert (line-of-sight-as (element val)) ast)
-          (let ((new-heap (make-heap :key #'polar-pt-r :test #'<)))
+          (heap-insert (line-of-sight-items (element val)) ast)
+          (let ((new-heap (make-heap :key #'pt-with-distance-r :test #'<)))
             (heap-insert new-heap ast)
-            (insert-new-item accum (make-line-of-sight :α φ :as new-heap))))
+            (insert-new-item accum (make-line-of-sight :α φ :items new-heap))))
       accum)))
 
 (defun sky-map (station asteroids)
@@ -43,17 +43,17 @@
         (unless (equalp a station)
           (accumulate (list (angle station a)
                             (let ((r (dist station a)))
-                              (make-polar-pt :p a :r r)))
+                              (make-pt-with-distance :x (pt-x a) :y (pt-y a)
+                                                     :r r)))
                       :by #'add-asteroid
                       :initial-value (make-instance 'red-black-tree
                                                     :sorter #'>
                                                     :key #'line-of-sight-α)))))
 
 (defun encode-200th-vaporized (mp)
-  (let* ((_200th (line-of-sight-as (nth-element mp 198)))
-         (closest (polar-pt-p (heap-maximum _200th))))
-    (+ (* 100 (pt-x closest))
-       (pt-y closest))))
+  (let* ((_200th (line-of-sight-items (nth-element mp 198)))
+         (closest (heap-maximum _200th)))
+    (+ (* 100 (pt-x closest)) (pt-y closest))))
 
 (defun main ()
   (mvlet* ((asteroids (read-asteroids *standard-input* 27))
