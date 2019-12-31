@@ -7,8 +7,7 @@
 (in-package #:aoc2019d10)
 
 (defstruct pt x y)
-(defstruct (pt-with-distance (:include pt)) r)
-(defstruct line-of-sight α items)
+(defstruct (sky-object (:conc-name pt-) (:include pt)) r α)
 
 (defun read-asteroids (s size)
   (iter (for idx from 0 below (expt size 2))
@@ -29,31 +28,26 @@
            (expt (- (pt-y s) (pt-y a)) 2))))
 
 (defun add-asteroid (polar accum)
-  (destructuring-bind (φ ast) polar
-    (let ((val (item-at accum φ)))
-      (if val
-          (heap-insert (line-of-sight-items (element val)) ast)
-          (let ((new-heap (make-heap :key #'pt-with-distance-r :test #'<)))
-            (heap-insert new-heap ast)
-            (insert-new-item accum (make-line-of-sight :α φ :items new-heap))))
-      accum)))
+  (if-let ((val (when-let ((i (item-at accum (pt-α polar)))) (element i))))
+    (if (< (pt-r polar) (pt-r val))
+      (insert-new-item accum polar)
+      accum)
+    (insert-new-item accum polar)))
 
 (defun sky-map (station asteroids)
   (iter (for a in asteroids)
         (unless (equalp a station)
-          (accumulate (list (angle station a)
-                            (let ((r (dist station a)))
-                              (make-pt-with-distance :x (pt-x a) :y (pt-y a)
-                                                     :r r)))
+          (accumulate (make-sky-object :x (pt-x a) :y (pt-y a)
+                                       :α (angle station a)
+                                       :r (dist station a))
                       :by #'add-asteroid
                       :initial-value (make-instance 'red-black-tree
                                                     :sorter #'>
-                                                    :key #'line-of-sight-α)))))
+                                                    :key #'pt-α)))))
 
 (defun encode-200th-vaporized (mp)
-  (let* ((_200th (line-of-sight-items (nth-element mp 198)))
-         (closest (heap-maximum _200th)))
-    (+ (* 100 (pt-x closest)) (pt-y closest))))
+  (let* ((_200th (nth-element mp 198)))
+    (+ (* 100 (pt-x _200th)) (pt-y _200th))))
 
 (defun main ()
   (mvlet* ((asteroids (read-asteroids *standard-input* 27))
