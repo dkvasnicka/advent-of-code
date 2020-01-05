@@ -6,7 +6,7 @@
 (in-package #:aoc2019d12)
 
 (defparameter *moons-positions* #2A(( -3  10  -1)
-                                    (-12 -10  -1)
+                                    (-12 -10  -5)
                                     ( -9   0  10)
                                     (  7  -5  -3)))
 
@@ -15,6 +15,11 @@
                                     ; ( 2  -10  -7)
                                     ; ( 4   -8   8)
                                     ; ( 3    5  -1)))
+; (defparameter *moons-positions* #2A((-8  -10   0)
+                                    ; ( 5    5  10)
+                                    ; ( 2   -7   3)
+                                    ; ( 9   -8  -3)))
+
 
 (defparameter *moons-velocities*
   (make-array '(4 3) :initial-element 0 :element-type 'integer))
@@ -23,7 +28,8 @@
   ; TODO: maybe rewrite using alexandria:map-combinations?
   (aops:generate
     (lambda (subs)
-      (with (((moon coord) subs) (this (aref pos moon coord)))
+      (with (((moon coord) subs)
+             (this (aref pos moon coord)))
             (iter (for x from 0 to 3)
                   (unless (= x moon)
                     (reducing (let ((other (aref pos x coord)))
@@ -38,13 +44,18 @@
 
 (defun trajectories-seq (pos vel)
   (lazy-sequence
-    (let* ((new-vel (compute-velocities pos vel)) ; arrows
+    (let* ((new-vel (compute-velocities pos vel))
            (new-pos (apply-velocities pos new-vel)))
       (cons (list new-pos new-vel)
             (trajectories-seq new-pos new-vel)))))
 
+(defun energy (a)
+  (aops:each-index i (aops:sum-index j (abs (aref a i j)))))
+
 (defun main ()
-  (time
-    (with ((pos1000 vel1000 (elt (trajectories-seq *moons-positions*
-                                                   *moons-velocities*) 999)))
-          (princ pos1000))))
+  (princ
+    (with ((trajectories (trajectories-seq *moons-positions* *moons-velocities*))
+           ((pos1000 vel1000) (elt trajectories 999))
+           (potentials (energy pos1000))
+           (kinetics (energy vel1000)))
+          (reduce #'+ (map #'* potentials kinetics)))))
