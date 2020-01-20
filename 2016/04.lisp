@@ -10,17 +10,16 @@
                                     (char< (car l) (car r))))))))
 
 (defun real-room? (sector-name checksum)
-  (let ((sector-name-hist (iter (for ch in-string sector-name)
-                                (when (alphanumericp ch)
-                                  (collect-frequencies ch)))))
-    (starts-with-subseq checksum (most-common-chars sector-name-hist))))
+  (starts-with-subseq checksum (most-common-chars
+                                 (iter (for ch in-string sector-name)
+                                       (when (alphanumericp ch)
+                                         (collect-frequencies ch))))))
 
 (defun main ()
   (pr
     (time
       (iter (for l in-stream *standard-input* using #'read-line)
-            (cl-ppcre:register-groups-bind
-              (sector-name sector-id checksum)
+            (cl-ppcre:register-groups-bind (sector-name sector-id checksum)
               ("((?:[a-z]+\\-)+)(\\d+)\\[([a-z]+)\\]" l)
               (when (real-room? sector-name checksum)
                 (sum (parse-integer sector-id))))))))
