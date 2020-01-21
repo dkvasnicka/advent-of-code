@@ -15,19 +15,28 @@
                                        (when (alphanumericp ch)
                                          (collect-frequencies ch))))))
 
-(defun main ()
-  (pr
-    (time
-      (iter (for l in-stream *standard-input* using #'read-line)
-            (cl-ppcre:register-groups-bind (sector-name sector-id checksum)
-              ("((?:[a-z]+\\-)+)(\\d+)\\[([a-z]+)\\]" l)
-              (when (real-room? sector-name checksum)
-                (sum (parse-integer sector-id))))))))
+(defparameter *north-pole-rm-name*
+  '(#\n #\o #\r #\t #\h #\p #\o #\l #\e #\o #\b #\j #\e #\c #\t
+    #\s #\t #\o #\r #\a #\g #\e))
 
-; Evaluation took:
-  ; 0.011 seconds of real time
-  ; 0.010700 seconds of total run time (0.010549 user, 0.000151 system)
-  ; 100.00% CPU
-  ; 12 lambdas converted
-  ; 30,039,906 processor cycles
-  ; 3,723,568 bytes consed
+(defun north-pole-objs? (sector)
+  (with (((sector-name sector-id) sector)
+         (sid (parse-integer sector-id)))
+    (iter (for ch in-string sector-name)
+          (generating rm-ch in *north-pole-rm-name*)
+          (when (alphanumericp ch)
+            (always
+              (char=
+                (next rm-ch)
+                (code-char (+ 97 (mod (+ sid (- (char-int ch) 97)) 26)))))))))
+
+(defun main ()
+  (princ
+    (iter (for l in-stream *standard-input* using #'read-line)
+          (cl-ppcre:register-groups-bind (sector-name sector-id checksum)
+             ("((?:[a-z]+\\-)+)(\\d+)\\[([a-z]+)\\]" l)
+             (when (real-room? sector-name checksum)
+               (sum (parse-integer sector-id) into real-room-sid-sum)
+               (finding-first (list sector-name sector-id)
+                              such-that #'north-pole-objs? into npo))
+             (finally (return (cons real-room-sid-sum npo)))))))
