@@ -10,9 +10,13 @@
         (+ initial-fuel (fuel-needed initial-fuel)))))
 
 (defun main ()
-  (collect-sum
-    (map-fn 'number
-            #'fuel-needed
-            (scan-stream *standard-input* #'read))))
+  (princ
+    (time
+      (collect-sum
+        (map-fn 'number
+                #'fuel-needed
+                (scan-stream *standard-input* #'read))))))
 
-(princ (main))
+; 100 rows  - avg 0.17 ms
+; 1000 rows - avg 1.35 ms
+; 5000 rows - avg 6.60 ms
