@@ -3,3 +3,4 @@ tags
 compiled
 *.fasl
 .gradle
+**/build
