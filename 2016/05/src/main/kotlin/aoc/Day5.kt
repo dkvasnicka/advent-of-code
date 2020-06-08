@@ -2,12 +2,9 @@ package aoc
 
 import org.apache.commons.codec.digest.DigestUtils
 
-fun Sequence<Byte>.toPassword(): ByteArray {
-    val iter = iterator()
-    return ByteArray(8) { iter.next() }
-}
+const val PWD_SIZE = 8
 
-data class PwdChar(val position: Int, val value: Char)
+data class PwdChar(val pos: Char, val chr: Char)
 
 fun main(args: Array<String>) {
     val input = "cxdnnyjw"
@@ -19,23 +16,21 @@ fun main(args: Array<String>) {
 
     // Part 1
     val result = relevantHashes
-        .map { it.toByteArray()[5] }
-        .toPassword()
+        .map { it.toCharArray()[5] }
+        .take(PWD_SIZE)
+        .joinToString(separator = "")
 
-    println(String(result))
+    println(result)
 
     // Part 2
     val result2 = relevantHashes
-        .map(String::toCharArray)
-        .filter { it[5] in ('0'..'7') }
-        .distinctBy { it[5] }
-        .take(8)
-        .fold(CharArray(8), {
-            acc, hash ->
-                acc.set(Character.getNumericValue(hash[5]), hash[6])
-                acc
-            }
-        )
+        .map { val ary = it.toCharArray(); PwdChar(ary[5], ary[6]) }
+        .filter { it.pos in ('0'..'7') }
+        .distinctBy { it.pos }
+        .take(PWD_SIZE)
+        .sortedBy { it.pos }
+        .map { it.chr }
+        .joinToString(separator = "")
 
     println(result2)
 }
