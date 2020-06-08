@@ -4,3 +4,7 @@ compiled
 *.fasl
 .gradle
 **/build
+Snap*
+heapdump*
+core*
+javacore*
