@@ -3,7 +3,7 @@
 version       = "0.1.0"
 author        = "Daniel Kvasnicka"
 description   = "AoC 2016 day 6"
-license       = "Unlicense"
+license       = "GPLv3"
 srcDir        = "src"
 bin           = @["day06"]
 
