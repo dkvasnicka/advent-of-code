@@ -10,16 +10,18 @@ fn main() {
         .map(|line| line.unwrap().trim().parse::<i32>().unwrap());
 
     let mut tree = BTreeSet::new();
-
     for n in nums {
         tree.insert(n);
     }
 
-    for expense in &tree {
+    let product = tree.iter().find_map(|expense| {
         let counterpart = 2020 - expense;
         if tree.contains(&counterpart) {
-            println!("{}", expense * counterpart);
-            break;
+            Some(expense * counterpart)
+        } else {
+            None
         }
-    }
+    });
+
+    println!("{}", product.unwrap())
 }
