@@ -6,14 +6,11 @@ fn decompose(tree: &BTreeSet<i32>, start: i32, level: i8) -> Option<i32> {
     return tree.iter().find_map(|expense| {
         let counterpart = start - expense;
         if level == 0 {
-            if tree.contains(&counterpart) {
-                Some(expense * counterpart)
-            } else {
-                None
-            }
+            tree.get(&counterpart).map(|i| i.to_owned())
         } else {
-            decompose(tree, counterpart, level - 1).map(|i| expense * i)
+            decompose(tree, counterpart, level - 1)
         }
+        .map(|i| expense * i)
     });
 }
 
