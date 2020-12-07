@@ -41,11 +41,9 @@ fn main() {
     let cnt2 = nums
         .iter()
         .filter(|(lower, upper, letter, pwd)| {
-            let idxs = pwd
-                .match_indices(letter)
-                .map(|p| p.0 + 1)
-                .collect::<Vec<usize>>();
-            idxs.contains(lower) ^ idxs.contains(upper)
+            let chars = pwd.chars().collect::<Vec<char>>();
+            let letter_char = letter.chars().next().unwrap();
+            (chars[*lower - 1] == letter_char) ^ (chars[*upper - 1] == letter_char)
         })
         .count();
 
