@@ -22,16 +22,16 @@ fn main() {
             (
                 parsed["lower"].parse::<usize>().unwrap(),
                 parsed["upper"].parse::<usize>().unwrap(),
-                parsed["letter"].to_string(),
+                parsed["letter"].chars().next().unwrap(),
                 parsed["password"].to_string(),
             )
         })
-        .collect::<Vec<(usize, usize, String, String)>>();
+        .collect::<Vec<(usize, usize, char, String)>>();
 
     let cnt = nums
         .iter()
         .filter(|(lower, upper, letter, pwd)| {
-            let letter_count = pwd.matches(letter).count();
+            let letter_count = pwd.matches(*letter).count();
             (*lower..upper + 1).contains(&letter_count)
         })
         .count();
@@ -42,8 +42,7 @@ fn main() {
         .iter()
         .filter(|(lower, upper, letter, pwd)| {
             let chars = pwd.chars().collect::<Vec<char>>();
-            let letter_char = letter.chars().next().unwrap();
-            (chars[*lower - 1] == letter_char) ^ (chars[*upper - 1] == letter_char)
+            (chars[*lower - 1] == *letter) ^ (chars[*upper - 1] == *letter)
         })
         .count();
 
