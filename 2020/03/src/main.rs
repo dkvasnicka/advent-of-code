@@ -36,14 +36,14 @@ fn main() {
     ];
 
     let stdin = io::stdin();
-    let result = stdin
+    let sums = stdin
         .lock()
         .lines()
         .skip(1)
         .map(|line| line.unwrap())
         .enumerate()
         .scan(slopes, |ss, (idx, l)| {
-            let increments: Vec<u8> = ss
+            let increments: Vec<u32> = ss
                 .iter_mut()
                 .map(|slope| {
                     if (idx + 1).rem_euclid(slope.down) == 0 {
@@ -59,11 +59,13 @@ fn main() {
                 })
                 .collect();
 
-            Some(u8x4::from_slice_aligned(increments.as_slice()))
+            Some(u32x4::from_slice_aligned(increments.as_slice()))
         })
-        .fold_first(u8x4::add)
-        .unwrap()
-        .wrapping_product();
+        .fold_first(u32x4::add)
+        .unwrap();
 
-    println!("{:?}", result as u32 * 228)
+    // Constant obtained by running part1.rs
+    let result = sums.wrapping_product() as u64 * 228;
+
+    println!("{:?}", result)
 }
