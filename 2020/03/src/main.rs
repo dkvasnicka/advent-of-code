@@ -62,7 +62,7 @@ mod tests {
                         .map(|slope| {
                             if (idx + 1).rem_euclid(slope.down) == 0 {
                                 slope.offset = (slope.offset + slope.right) % l.len();
-                                if l.get(slope.offset..slope.offset + 1).unwrap() == "#" {
+                                if l.as_bytes()[slope.offset] == b'#' {
                                     1
                                 } else {
                                     0
