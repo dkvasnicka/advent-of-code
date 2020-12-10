@@ -11,3 +11,5 @@ Rust dev
 ```
 reflex -g 'src/*.rs' -d none -- sh -c "echo \"---------------\" && cargo r < `basename $PWD`.txt"
 ```
+
+Use `cargo bench` for challenges that are implemented as benchmarks.
