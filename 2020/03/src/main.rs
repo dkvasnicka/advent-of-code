@@ -62,10 +62,10 @@ mod tests {
                         .map(|slope| {
                             if (idx + 1).rem_euclid(slope.down) == 0 {
                                 slope.offset = (slope.offset + slope.right) % l.len();
-                                match l.get(slope.offset..slope.offset + 1).unwrap() {
-                                    "#" => 1,
-                                    "." => 0,
-                                    _ => panic!(),
+                                if l.get(slope.offset..slope.offset + 1).unwrap() == "#" {
+                                    1
+                                } else {
+                                    0
                                 }
                             } else {
                                 0
