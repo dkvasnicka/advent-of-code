@@ -7,26 +7,17 @@ fn main() {
         .lines()
         .map(|l| l.unwrap())
         .map(|seat_id| {
-            let (row, column) = seat_id.split_at(7);
-            (
-                row.chars()
-                    .map(|c| match c {
-                        'F' => '0',
-                        'B' => '1',
-                        _ => panic!(),
-                    })
-                    .collect::<String>(),
-                column
-                    .chars()
-                    .map(|c| match c {
-                        'L' => '0',
-                        'R' => '1',
-                        _ => panic!(),
-                    })
-                    .collect::<String>(),
-            )
+            seat_id
+                .chars()
+                .map(|c| match c {
+                    'F' | 'L' => '0',
+                    'B' | 'R' => '1',
+                    _ => panic!(),
+                })
+                .collect::<String>()
         })
-        .map(|(row, column)| {
+        .map(|seat_id| {
+            let (row, column) = seat_id.split_at(7);
             u16::from_str_radix(&row, 2).unwrap() * 8 + u16::from_str_radix(&column, 2).unwrap()
         })
         .max()
