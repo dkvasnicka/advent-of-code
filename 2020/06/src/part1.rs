@@ -1,4 +1,3 @@
-#![feature(iterator_fold_self)]
 use itertools::Itertools;
 use std::{collections::HashSet, io::*};
 
@@ -14,9 +13,9 @@ fn main() {
         .into_iter()
         .step_by(2)
         .map(|(_k, g)| {
-            g.map(|s| s.chars().collect::<HashSet<char>>())
-                .fold_first(|l, r| l.intersection(&r).map(char::to_owned).collect())
-                .unwrap()
+            g.map(|s| s.chars().collect_vec())
+                .flatten()
+                .collect::<HashSet<char>>()
                 .len()
         })
         .sum();
