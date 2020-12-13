@@ -1,5 +1,3 @@
-use itertools::FoldWhile::{Continue, Done};
-use itertools::Itertools;
 use std::io::*;
 
 fn main() {
@@ -22,14 +20,8 @@ fn main() {
             let (row, column) = seat_id.split_at(7);
             u16::from_str_radix(&row, 2).unwrap() * 8 + u16::from_str_radix(&column, 2).unwrap()
         })
-        .sorted()
-        .fold_while(0, |acc, seat| {
-            if seat - acc == 2 {
-                Done(acc + 1)
-            } else {
-                Continue(seat)
-            }
-        });
+        .max()
+        .unwrap();
 
-    println!("{:?}", result.into_inner())
+    println!("{:?}", result)
 }
