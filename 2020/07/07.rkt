@@ -1,6 +1,7 @@
 #lang racket
 
-(require racklog (only-in threading ~>))
+(require racklog
+         (only-in threading ~>))
 
 (struct bag (color content) #:transparent)
 
@@ -13,8 +14,9 @@
     (bag color
          (flatten
            (cons (or content '())
-                 (map (λ (bagspec) (third (regexp-match *other-regex* (string-trim bagspec))))
-                      other))))))
+                 (for/list ([bagspec other])
+                   (third
+                     (regexp-match *other-regex* (string-trim bagspec)))))))))
 
 (define %contains %empty-rel)
 
