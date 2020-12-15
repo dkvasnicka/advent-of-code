@@ -13,3 +13,8 @@ reflex -g 'src/*.rs' -d none -- sh -c "echo \"---------------\" && cargo r < `ba
 ```
 
 Use `cargo bench` for challenges that are implemented as benchmarks.
+
+Racket dev
+---
+
+Use 2018 Reflex config file: `reflex -c ../../2018/.reflex`
