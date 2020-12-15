@@ -18,7 +18,8 @@
 
 (define %contains %empty-rel)
 
-(for ([b (sequence-map parse-bag (in-lines))]
+(for ([b (for/stream ([l (in-lines)] #:unless (string-prefix? l "shiny gold"))
+           (parse-bag l))]
       #:unless (null? (bag-content b)))
   (for ([in (bag-content b)])
     (%assert! %contains ()
@@ -26,9 +27,9 @@
 
 (define %eventually-contains
   (%rel (x y z)
-        [(x z)
-         (%contains x y)
-         (%contains y z)]))
+        [(x z) (%contains x z)]
+        [(x z) (%contains x y)
+               (%eventually-contains y z)]))
 
 (let ([pt1 (%which (bags-with-gold-bags)
                    (%let (a-bag x)
