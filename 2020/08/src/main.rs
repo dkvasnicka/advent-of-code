@@ -31,5 +31,25 @@ fn main() {
         .map(|l| Instr::from(&l.unwrap()))
         .collect_vec();
 
-    println!("{:?}", tape)
+    let mut accumulator = 0;
+    let mut visited: HashSet<i16> = HashSet::new();
+    let mut next: i16 = 0;
+
+    while !visited.contains(&next) {
+        visited.insert(next);
+        match tape[next as usize] {
+            Instr::Nop => {
+                next = next + 1;
+            }
+            Instr::Acc(arg) => {
+                accumulator = accumulator + arg;
+                next = next + 1;
+            }
+            Instr::Jmp(arg) => {
+                next = next + arg;
+            }
+        }
+    }
+
+    println!("{:?}", accumulator)
 }
