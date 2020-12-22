@@ -1,9 +1,10 @@
 #![feature(iterator_fold_self)]
+use im::Vector;
 use itertools::Itertools;
 use std::result::Result;
 use std::{collections::HashSet, io::*};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Instr {
     Acc(i16),
     Jmp(i16),
@@ -24,25 +25,28 @@ impl From<&String> for Instr {
     }
 }
 
+#[derive(Debug, Clone)]
 struct Console {
     accumulator: i16,
     visited: HashSet<i16>,
     next: i16,
-    tape: Vec<Instr>,
+    swapped_index: i16,
+    tape: Vector<Instr>,
 }
 
 impl Console {
-    pub fn new(tape: Vec<Instr>) -> Self {
+    pub fn new(tape: Vector<Instr>) -> Self {
         Console {
             accumulator: 0,
             visited: HashSet::new(),
             next: 0,
+            swapped_index: -1,
             tape,
         }
     }
 
     pub fn run(&mut self) -> Result<i16, i16> {
-        while !self.visited.contains(&self.next) {
+        while self.visited.len() < self.tape.len() {
             self.visited.insert(self.next);
             match self.tape[self.next as usize] {
                 Instr::Nop => {
@@ -56,9 +60,13 @@ impl Console {
                     self.next = self.next + arg;
                 }
             }
+
+            if self.visited.contains(&self.next) {
+                return Err(self.accumulator);
+            }
         }
 
-        Err(self.accumulator)
+        Ok(self.accumulator)
     }
 }
 
@@ -68,7 +76,7 @@ fn main() {
         .lock()
         .lines()
         .map(|l| Instr::from(&l.unwrap()))
-        .collect_vec();
+        .collect::<Vector<Instr>>();
 
     let mut console = Console::new(tape);
     let result = console.run();
