@@ -26,7 +26,7 @@ impl From<&String> for Instr {
 }
 
 impl Instr {
-    fn swap(&self) -> Self {
+    fn flip(&self) -> Self {
         match self {
             Self::Nop(arg) => Self::Jmp(*arg),
             Self::Jmp(arg) => Self::Nop(*arg),
@@ -55,13 +55,13 @@ impl Console {
 
     pub fn mutations(&self) -> Mutations {
         Mutations {
-            console: self,
-            search_area: self.tape.clone(),
+            original_tape: &self.tape,
+            last_index: -1,
         }
     }
 
     pub fn run(&mut self) -> Result<i16, i16> {
-        while self.visited.len() < self.tape.len() {
+        while self.next < self.tape.len() as i16 {
             self.visited.insert(self.next);
             match self.tape[self.next as usize] {
                 Instr::Nop(_) => {
@@ -76,10 +76,6 @@ impl Console {
                 }
             }
 
-            if self.next >= self.tape.len() as i16 {
-                break;
-            }
-
             if self.visited.contains(&self.next) {
                 return Err(self.accumulator);
             }
@@ -90,33 +86,31 @@ impl Console {
 }
 
 struct Mutations<'a> {
-    console: &'a Console,
-    search_area: Vector<Instr>,
+    original_tape: &'a Vector<Instr>,
+    last_index: i16,
 }
 
 impl<'a> Iterator for Mutations<'a> {
     type Item = Console;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (idx, candidate) = self
-            .search_area
-            .iter()
-            .enumerate()
-            .find(|(_idx, e)| match e {
-                Instr::Acc(_) => false,
-                Instr::Jmp(_) => true,
-                Instr::Nop(_) => true,
-            })
-            .unwrap();
+        let mut idx = (self.last_index + 1) as usize;
+        let candidate = loop {
+            match &self.original_tape[idx] {
+                Instr::Acc(_) => (),
+                c @ _ => {
+                    self.last_index = idx as i16;
+                    break c;
+                }
+            }
+            idx += 1;
+        };
 
-        let new_tape = self.console.tape.update(
-            idx + self.console.tape.len() - self.search_area.len(),
-            candidate.swap(),
-        );
-        let nxt = Some(Console::new(new_tape));
-        self.search_area = self.search_area.skip(idx + 1);
+        let new_tape = self
+            .original_tape
+            .update(self.last_index as usize, candidate.flip());
 
-        nxt
+        Some(Console::new(new_tape))
     }
 }
 
