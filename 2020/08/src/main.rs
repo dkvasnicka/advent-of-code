@@ -1,5 +1,6 @@
 #![feature(iterator_fold_self)]
 use itertools::Itertools;
+use std::result::Result;
 use std::{collections::HashSet, io::*};
 
 #[derive(Debug)]
@@ -23,6 +24,44 @@ impl From<&String> for Instr {
     }
 }
 
+struct Console {
+    accumulator: i16,
+    visited: HashSet<i16>,
+    next: i16,
+    tape: Vec<Instr>,
+}
+
+impl Console {
+    pub fn new(tape: Vec<Instr>) -> Self {
+        Console {
+            accumulator: 0,
+            visited: HashSet::new(),
+            next: 0,
+            tape,
+        }
+    }
+
+    pub fn run(&mut self) -> Result<i16, i16> {
+        while !self.visited.contains(&self.next) {
+            self.visited.insert(self.next);
+            match self.tape[self.next as usize] {
+                Instr::Nop => {
+                    self.next = self.next + 1;
+                }
+                Instr::Acc(arg) => {
+                    self.accumulator = self.accumulator + arg;
+                    self.next = self.next + 1;
+                }
+                Instr::Jmp(arg) => {
+                    self.next = self.next + arg;
+                }
+            }
+        }
+
+        Err(self.accumulator)
+    }
+}
+
 fn main() {
     let stdin = stdin();
     let tape = stdin
@@ -31,25 +70,8 @@ fn main() {
         .map(|l| Instr::from(&l.unwrap()))
         .collect_vec();
 
-    let mut accumulator = 0;
-    let mut visited: HashSet<i16> = HashSet::new();
-    let mut next: i16 = 0;
+    let mut console = Console::new(tape);
+    let result = console.run();
 
-    while !visited.contains(&next) {
-        visited.insert(next);
-        match tape[next as usize] {
-            Instr::Nop => {
-                next = next + 1;
-            }
-            Instr::Acc(arg) => {
-                accumulator = accumulator + arg;
-                next = next + 1;
-            }
-            Instr::Jmp(arg) => {
-                next = next + arg;
-            }
-        }
-    }
-
-    println!("{:?}", accumulator)
+    println!("{:?}", result.expect_err("Console was supposed to loop."))
 }
