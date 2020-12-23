@@ -21,5 +21,23 @@ fn main() {
             .xor(Some(*last))
     });
 
-    println!("{:?}", result.unwrap());
+    println!("Part 1: {:?}", result.unwrap());
+
+    let result2 = (0..nums.len()).find_map(|start| {
+        let mut sum: i64 = 0;
+        let mut max: i64 = nums[start];
+        let mut min: i64 = nums[start];
+        for idx in start..nums.len() {
+            sum += nums[idx];
+            max = max.max(nums[idx]);
+            min = min.min(nums[idx]);
+            if sum == 2089807806i64 {
+                return Some(min + max);
+            }
+        }
+
+        None
+    });
+
+    println!("Part 2: {:?}", result2.unwrap());
 }
