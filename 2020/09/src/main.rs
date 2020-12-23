@@ -13,15 +13,12 @@ fn main() {
 
     let result = nums_slice.windows(26).find_map(|win| {
         let (last, previous) = win.split_last().unwrap();
-        if previous
+        previous
             .iter()
             .combinations(2)
-            .any(|c| c[0] + c[1] == *last)
-        {
-            None
-        } else {
-            Some(last)
-        }
+            .map(|c| c[0] + c[1])
+            .find(|s| s == last)
+            .xor(Some(*last))
     });
 
     println!("{:?}", result.unwrap());
