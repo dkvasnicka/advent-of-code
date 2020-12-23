@@ -24,9 +24,9 @@ fn main() {
     println!("Part 1: {:?}", result.unwrap());
 
     let result2 = (0..nums.len()).find_map(|start| {
-        let mut sum: i64 = 0;
-        let mut max: i64 = nums[start];
-        let mut min: i64 = nums[start];
+        let mut sum = 0i64;
+        let mut max = nums[start];
+        let mut min = nums[start];
         for idx in start..nums.len() {
             sum += nums[idx];
             max = max.max(nums[idx]);
