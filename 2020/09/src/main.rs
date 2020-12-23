@@ -1,6 +1,7 @@
 #![feature(iterator_fold_self)]
 use itertools::Itertools;
 use std::io::*;
+use std::result::Result;
 
 fn main() {
     let stdin = stdin();
@@ -23,21 +24,20 @@ fn main() {
 
     println!("Part 1: {:?}", result.unwrap());
 
-    let result2 = (0..nums.len()).find_map(|start| {
-        let mut sum = 0i64;
-        let mut max = nums[start];
-        let mut min = nums[start];
-        for idx in start..nums.len() {
-            sum += nums[idx];
-            max = max.max(nums[idx]);
-            min = min.min(nums[idx]);
-            if sum == 2089807806i64 {
-                return Some(min + max);
-            }
-        }
-
-        None
+    let result2: Option<Result<(), i64>> = (0..nums.len()).find_map(|start| {
+        (start..nums.len())
+            .try_fold((0i64, nums[start], nums[start]), |(sum, min, max), idx| {
+                let new_sum = sum + nums[idx];
+                let new_min = min.min(nums[idx]);
+                let new_max = max.max(nums[idx]);
+                if new_sum == 2089807806i64 {
+                    return Err(new_min + new_max);
+                }
+                Ok((new_sum, new_min, new_max))
+            })
+            .map(|_| None)
+            .transpose()
     });
 
-    println!("Part 2: {:?}", result2.unwrap());
+    println!("Part 2: {:?}", result2.unwrap().unwrap_err());
 }
