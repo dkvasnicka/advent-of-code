@@ -30,10 +30,10 @@ fn main() {
                 let new_sum = sum + nums[idx];
                 let new_min = min.min(nums[idx]);
                 let new_max = max.max(nums[idx]);
-                if new_sum == 2089807806i64 {
-                    return Err(new_min + new_max);
+                match new_sum {
+                    2089807806i64 => Err(new_min + new_max),
+                    _ => Ok((new_sum, new_min, new_max)),
                 }
-                Ok((new_sum, new_min, new_max))
             })
             .map(|_| None)
             .transpose()
