@@ -1,5 +1,7 @@
 #![feature(iterator_fold_self)]
 use itertools::Itertools;
+use petgraph::algo::all_simple_paths;
+use petgraph::prelude::*;
 use std::io::*;
 use std::ops::Mul;
 
@@ -34,7 +36,8 @@ fn main() {
         .chain(0..1)
         .collect_vec();
     nums.sort();
-    nums.push(nums.last().unwrap() + 3);
+    let max_joltage = nums.last().unwrap().to_owned();
+    nums.push(max_joltage + 3);
     let (head, tail) = nums.split_first().unwrap();
 
     let (ones, threes): (Counter, Counter) = tail
@@ -50,4 +53,23 @@ fn main() {
         .partition(|diff| diff == &1);
 
     println!("Part 1: {:?}", ones * threes);
+
+    nums.append(&mut vec![255, 255, 255, 255]);
+    let edges = nums
+        .as_slice()
+        .windows(4)
+        .map(|w| {
+            let (head, tail) = w.split_first().unwrap();
+            tail.iter().filter_map(move |n| match n - head {
+                1..=3 => Some((head.to_owned(), n.to_owned())),
+                _ => None,
+            })
+        })
+        .flatten();
+
+    let graph = DiGraph::<(), (), u8>::from_edges(edges);
+    let paths =
+        all_simple_paths::<Vec<NodeIndex<u8>>, _>(&graph, 0u8.into(), max_joltage.into(), 1, None);
+
+    println!("Part 2: {:?}", paths.count());
 }
