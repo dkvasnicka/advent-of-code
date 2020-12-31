@@ -62,6 +62,7 @@ mod tests {
         let mut tseq = Tribonacci::default();
         assert_eq!(tseq.nth(5), Some(7));
         assert_eq!(tseq.nth(6), Some(13));
+        assert_eq!(tseq.nth(4), Some(4));
     }
 
     #[test]
