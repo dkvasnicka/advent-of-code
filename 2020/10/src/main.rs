@@ -43,13 +43,34 @@ impl Iterator for Tribonacci {
         self.0
             .get(n)
             .map(|x| x.to_owned())
-            .or_else(|| self.take(n + 1).last())
+            .or_else(|| self.take(n - self.0.len() + 1).last())
     }
 }
 
 impl Default for Tribonacci {
     fn default() -> Self {
         Tribonacci(Vec::new())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tribonacci_nth() {
+        let mut tseq = Tribonacci::default();
+        assert_eq!(tseq.nth(5), Some(7));
+        assert_eq!(tseq.nth(6), Some(13));
+    }
+
+    #[test]
+    fn test_tribonacci_seq() {
+        let tseq = Tribonacci::default();
+        assert_eq!(
+            tseq.take(10).collect_vec(),
+            vec![0, 1, 1, 2, 4, 7, 13, 24, 44, 81]
+        );
     }
 }
 
@@ -66,7 +87,7 @@ fn main() {
     nums.push(max_joltage + 3);
 
     let (head, tail) = nums.split_first().unwrap();
-    let diffs: Vec<u8> = tail
+    let diffs = tail
         .iter()
         .scan(head, |state, n| {
             let diff = n - *state;
@@ -76,46 +97,25 @@ fn main() {
                 _ => None,
             }
         })
-        .collect();
-    let (ones, threes): (Counter, Counter) = diffs.iter().partition(|diff| *diff == &1);
+        .collect_vec();
+    let (ones, threes): (Counter, Counter) = diffs.iter().partition(|&diff| diff == &1);
 
     println!("Part 1: {:?}", ones * threes);
 
-    let one_runs = diffs.iter().group_by(|d| d.to_owned());
+    let runs = diffs.iter().group_by(|&d| d == &1);
     let mut tribbo = Tribonacci::default();
-    let result2: u64 = one_runs
+    let result2: u64 = runs
         .into_iter()
-        .filter_map(|(k, grp)| match k {
-            1 => {
+        .filter_map(|(k, grp)| {
+            k.then(|| {
                 let size = grp.into_iter().count();
                 match size {
-                    s if s > 1 => tribbo.nth(s + 1),
-                    _ => None,
+                    s if s > 1 => tribbo.nth(s + 1).unwrap(),
+                    _ => 1,
                 }
-            }
-            _ => None,
+            })
         })
         .product();
 
     println!("Part 2: {:?}", result2);
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_tribonacci_nth() {
-        let mut tseq = Tribonacci::default();
-        assert_eq!(tseq.nth(5), Some(7));
-    }
-
-    #[test]
-    fn test_tribonacci_seq() {
-        let tseq = Tribonacci::default();
-        assert_eq!(
-            tseq.take(10).collect_vec(),
-            vec![0, 1, 1, 2, 4, 7, 13, 24, 44, 81]
-        );
-    }
 }
