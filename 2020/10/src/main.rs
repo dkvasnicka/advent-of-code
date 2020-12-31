@@ -1,7 +1,5 @@
 #![feature(iterator_fold_self)]
 use itertools::Itertools;
-use petgraph::algo::all_simple_paths;
-use petgraph::prelude::*;
 use std::io::*;
 use std::ops::Mul;
 
@@ -13,8 +11,8 @@ impl Default for Counter {
     }
 }
 
-impl Extend<u8> for Counter {
-    fn extend<T: IntoIterator<Item = u8>>(&mut self, iter: T) {
+impl<'a> Extend<&'a u8> for Counter {
+    fn extend<T: IntoIterator<Item = &'a u8>>(&mut self, iter: T) {
         self.0 += iter.into_iter().count();
     }
 }
@@ -24,6 +22,34 @@ impl Mul for Counter {
 
     fn mul(self, rhs: Self) -> Self::Output {
         self.0 * rhs.0
+    }
+}
+
+struct Tribonacci(Vec<u64>);
+
+impl Iterator for Tribonacci {
+    type Item = u64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let val = match self.0.len() {
+            1 => 1,
+            _ => self.0.iter().rev().take(3).sum(),
+        };
+        self.0.push(val);
+        Some(val)
+    }
+
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.0
+            .get(n)
+            .map(|x| x.to_owned())
+            .or_else(|| self.take(n + 1).last())
+    }
+}
+
+impl Default for Tribonacci {
+    fn default() -> Self {
+        Tribonacci(Vec::new())
     }
 }
 
@@ -38,9 +64,9 @@ fn main() {
     nums.sort();
     let max_joltage = nums.last().unwrap().to_owned();
     nums.push(max_joltage + 3);
-    let (head, tail) = nums.split_first().unwrap();
 
-    let (ones, threes): (Counter, Counter) = tail
+    let (head, tail) = nums.split_first().unwrap();
+    let diffs: Vec<u8> = tail
         .iter()
         .scan(head, |state, n| {
             let diff = n - *state;
@@ -50,26 +76,46 @@ fn main() {
                 _ => None,
             }
         })
-        .partition(|diff| diff == &1);
+        .collect();
+    let (ones, threes): (Counter, Counter) = diffs.iter().partition(|diff| *diff == &1);
 
     println!("Part 1: {:?}", ones * threes);
 
-    nums.append(&mut vec![255, 255, 255, 255]);
-    let edges = nums
-        .as_slice()
-        .windows(4)
-        .map(|w| {
-            let (head, tail) = w.split_first().unwrap();
-            tail.iter().filter_map(move |n| match n - head {
-                1..=3 => Some((head.to_owned(), n.to_owned())),
-                _ => None,
-            })
+    let one_runs = diffs.iter().group_by(|d| d.to_owned());
+    let mut tribbo = Tribonacci::default();
+    let result2: u64 = one_runs
+        .into_iter()
+        .filter_map(|(k, grp)| match k {
+            1 => {
+                let size = grp.into_iter().count();
+                match size {
+                    s if s > 1 => tribbo.nth(s + 1),
+                    _ => None,
+                }
+            }
+            _ => None,
         })
-        .flatten();
+        .product();
 
-    let graph = DiGraph::<(), (), u8>::from_edges(edges);
-    let paths =
-        all_simple_paths::<Vec<NodeIndex<u8>>, _>(&graph, 0u8.into(), max_joltage.into(), 1, None);
+    println!("Part 2: {:?}", result2);
+}
 
-    println!("Part 2: {:?}", paths.count());
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tribonacci_nth() {
+        let mut tseq = Tribonacci::default();
+        assert_eq!(tseq.nth(5), Some(7));
+    }
+
+    #[test]
+    fn test_tribonacci_seq() {
+        let tseq = Tribonacci::default();
+        assert_eq!(
+            tseq.take(10).collect_vec(),
+            vec![0, 1, 1, 2, 4, 7, 13, 24, 44, 81]
+        );
+    }
 }
