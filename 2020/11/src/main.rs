@@ -1,11 +1,11 @@
-#![feature(iterator_fold_self)]
 #![feature(control_flow_enum)]
 use itertools::Itertools;
 use ndarray::Array;
 use ndarray::{Array2, Zip};
 use std::{io::*, iter::successors, ops::ControlFlow};
 
-const TEST_PLAN_SIZE: (usize, usize) = (10, 10);
+// const PLAN_SIZE: (usize, usize) = (10, 10);
+const PLAN_SIZE: (usize, usize) = (97, 94);
 
 #[derive(Debug, PartialEq, Clone)]
 enum Cell {
@@ -58,16 +58,17 @@ fn main() {
         })
         .collect_vec();
 
-    let ary = Array::from_shape_vec(TEST_PLAN_SIZE, game_data).unwrap();
+    let ary = Array::from_shape_vec(PLAN_SIZE, game_data).unwrap();
 
     let mut evolution = successors(Some(ary), |a| Some(a.clone().evolve()));
-    let stabilized = evolution.try_fold(Array::from_elem(TEST_PLAN_SIZE, Cell::Empty), |acc, e| {
+    let stabilized = evolution.try_fold(Array::from_elem(PLAN_SIZE, Cell::Empty), |acc, e| {
         if acc == e {
             return ControlFlow::Break(e);
         }
 
         ControlFlow::Continue(e)
     });
+
     println!(
         "{:?}",
         stabilized
