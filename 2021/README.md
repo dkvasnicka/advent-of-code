@@ -1,6 +1,9 @@
 Advent of Code 2021
 =====
 
+This year the theme for me is to continue exploring Rust + sprinkling other statically typed languages
+here and there (mostly lisps).
+
 Docker setup
 ---
 * `docker build . -t aoc2021`
