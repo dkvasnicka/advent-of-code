@@ -10,6 +10,8 @@
 ; being able to refactor the program by just tweaking the `position` struct and
 ; methods and going by meaningful compiler errors wherever further changes were
 ; necessary, instead of relying on cryptic errors stemming from unexpectedly short lists etc.
+; Also, relying on lists and folding them using (map +) would have required more complex
+; refactoring. Overall a nice example of benefiting from a more robust upfront program design.
 
 (define-generics encodable (encode encodable))
 
