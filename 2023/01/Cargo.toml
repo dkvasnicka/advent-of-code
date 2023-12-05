@@ -1,0 +1,11 @@
+[package]
+name = "aoc2023_01"
+version = "0.1.0"
+authors = ["Daniel Kvasnicka <daniel.kvasnicka@hey.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.75"
+itertools = "0.12.0"
